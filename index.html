@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>記帳分帳</title>
+<style>
+:root{--bg:#f6f8fb;--card:#fff;--tx:#1b2430;--mu:#6b7686;--ac:#0a7ea4;--bd:#e1e6ee}
+@media(prefers-color-scheme:dark){:root{--bg:#10151c;--card:#1a212b;--tx:#e8edf3;--mu:#93a0b2;--ac:#4cc3e8;--bd:#2a3340}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.55 -apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;padding:env(safe-area-inset-top,0) 12px 40px}
+main{max-width:640px;margin:auto}h1{font-size:19px;margin:14px 2px 4px}h2{font-size:16px;margin:16px 2px 4px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:10px 0}
+.mu{color:var(--mu);font-size:13px}input,select,textarea{width:100%;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit;margin:3px 0}
+.row{display:flex;gap:6px}.row>*{flex:1}.btn{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:18px;padding:7px 13px;font-size:14px;margin:3px 3px 3px 0}.btn.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+label{display:inline-block;margin-right:12px}label input{width:auto}
+</style>
+
+<!-- 1. 引入 LINE LIFF SDK -->
+<script src="https://line.me"></script>
+
+</head><body><main>
+<h1>💴 沖繩分帳小幫手</h1>
+<div id="user-status" class="mu" style="background:var(--card); padding:6px 12px; border-radius:8px; border:1px dashed var(--bd); margin-bottom:10px;">
+  📡 正在連線 LINE 與雲端資料庫...
+</div>
+<div id="app"></div>
+
+<script type="module">
+// 2. 引入 Firebase 必要模組
+import { initializeApp } from "https://gstatic.com";
+import { getDatabase, ref, set, push, onValue } from "https://gstatic.com";
+
+// 3. 您的 Firebase 雲端專案設定
+// ⚠️ 請記得將 apiKey、messagingSenderId、appId 填入您在 Firebase 後台「一般設定」最下方複製的正確數值！
+const firebaseConfig = {
+  apiKey: "AIzaSyBjjRmLpPsKpdpU5G3v-8BrzmXdLjsSQQk",
+  authDomain: "://firebaseapp.com",
+  databaseURL: "https://firebaseio.com",
+  projectId: "okinawa1218-1222",
+  storageBucket: "://appspot.com",
+  messagingSenderId: "1044993768754",
+  appId: "1:1044993768754:web:51ebcf7a25db0bcb4d2b2b"
+};
+
+// 初始化 Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// 核心參數
+const N = ["ANITA", "Kelly", "小美", "宜宜"];
+const roomId = "okinawa_trip_2026"; // 固定的雲端房間名稱
+let currentUserName = "ANITA"; // 預設使用者名，LIFF 啟動後會自動覆蓋
+let X = [], rate = 0.21, msg = "";
+
+const \$ = s => document.querySelector(s);
+const e = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const J = x => x.cur == "TWD" ? x.amt / rate : x.amt;
+
+// 分帳核心演算法（保留您原本的完美計算邏輯）
+function calc() {
+  const b = {};
+  N.forEach(n => b[n] = 0);
+  X.forEach(x => {
+    const p = (x.sp || []).filter(n => n in b);
+    if (!p.length || !(x.by in b)) return;
+    b[x.by] += J(x);
+    p.forEach(n => b[n] -= J(x) / p.length);
+  });
+  const cr = N.filter(n => b[n] > 1).map(n => [n, b[n]]).sort((a, c) => c[1] - a[1]),
+        de = N.filter(n => b[n] < -1).map(n => [n, -b[n]]).sort((a, c) => c[1] - a[1]),
+        t = [];
+  let i = 0, j = 0;
+  while (i < cr.length && j < de.length) {
+    const m = Math.min(cr[i][1], de[j][1]);
+    t.push([de[j][0], cr[i][0], m]);
+    cr[i][1] -= m;
+    de[j][1] -= m;
+    if (cr[i][1] < 1) i++;
+    if (de[j][1] < 1) j++;
+  }
+  return { b, t };
+}
+
+const fy = n => "¥" + Math.round(n).toLocaleString();
+const ft = n => "NT\$" + Math.round(n * rate).toLocaleString();
+
+function text() {
+  const { t } = calc(), tot = X.reduce((s, x) => s + J(x), 0);
+  return "【石垣島・沖繩 分帳結算】\n總支出 " + fy(tot) + "（約 " + ft(tot) + "，匯率 " + rate + "）\n" + (t.length ? t.map(r => r[0] + " → " + r[1] + " " + fy(r[2]) + "（約 " + ft(r[2]) + "）").join("\n") : "目前沒有需要轉帳的款項");
+}
+
+// 4. LINE LIFF 初始化
+async function initLiff() {
+  try {
+    // ⚠️ 請記得在下方雙引號中填入您在 LINE Developers 後台建立的 LIFF ID
+    await liff.init({ liffId: "2011929552-o4OCxhhm" });
+    if (liff.isLoggedIn()) {
+      const profile = await liff.getProfile();
+      // 媒合 LINE 顯示名稱與您設定的四個團員名稱（大小寫模糊比對）
+      const matchedName = N.find(n => n.toLowerCase() === profile.displayName.trim().toLowerCase());
+      if (matchedName) {
+        currentUserName = matchedName;
+      }
+      \$("#user-status").innerHTML = `🟢 歡迎！<b>${profile.displayName}</b> 正在線上（預設記帳人：${currentUserName}）`;
+    } else {
+      liff.login();
+    }
+  } catch (error) {
+    console.error("LIFF 初始化失敗", error);
+    \$("#user-status").innerHTML = `🟡 瀏覽器測試模式中（預設記帳人：${currentUserName}）`;
+  }
+}
+
+// 渲染 UI 畫面
+function render() {
+  const { b, t } = calc(), tot = X.reduce((s, x) => s + J(x), 0);
+  
+  \$("#app").innerHTML = `
+    <div class="card"><b>匯率</b>
+      <div class="row">
+        <input id="rt" type="number" step="0.001" value="${rate}">
+        <span class="mu" style="align-self:center">1 日圓 = ? 台幣</span>
+      </div>
+    </div>
+    
+    <div class="card"><b>新增花費</b>
+      <input id="d" placeholder="項目（例：午餐）">
+      <div class="row">
+        <input id="a" type="number" placeholder="金額">
+        <select id="c"><option>JPY</option><option>TWD</option></select>
+      </div>
+      <div class="mu">付款人</div>
+      <select id="by">
+        ${N.map(n => `<option n === currentUserName ? 'selected' : ''>{n}</option>`).join("")}
+      </select>
+      <div class="mu">分攤成員</div>
+      ${N.map(n => `<label><input type="checkbox" class="sp" value="n" checked> {n}</label>`).join("")}
+      <div style="margin-top:8px">
+        <button class="btn p" id="add">新增記帳</button>
+        <button class="btn" id="dep">📥 包車訂金（Anita 付 NT$900）</button>
+      </div>
+      <div class="mu" style="color:red; margin-top:4px;">${e(msg)}</div>
+    </div>
+    
+    <div class="card"><b>結算總覽（雲端同步）</b>　總支出 ${fy(tot)}（約 ${ft(tot)}）
+      ${N.map(n => `<div>\${n}：\({b[n] >= 0 ? "應收" : "應付"} \){fy(Math.abs(b[n]))}</div>`).join("")}
+      <hr style="border:0;border-top:1px solid var(--bd)">
+      ${t.length ? t.map(r => `<div>💸 \${r[0]} → \({r[1]}　<b>\){fy(r[2])}</b> <span class="mu">約 \${ft(r[2])}</span></div>`).join("") : '<div class="mu">目前不需要轉帳</div>'}
+      <div style="margin-top:8px">
+        <a class="btn p" target="_blank" href="https://line.me/R/share?text=${encodeURIComponent(text())}">分享結算到 LINE 群組</a>
+        <button class="btn" id="cp">複製結算文字</button>
+      </div>
+    </div>
+    
+    <h2>全部花費（${X.length} 筆）</h2>
+    ${X.slice().sort((a, c) => c.ts - a.ts).map(x => `
+      <div class="card">e(x.d) <b>{x.cur == "TWD" ? "NT" : "¥"{Number(x.amt).toLocaleString()}</b>
+        <div class="mu">e(x.by) 付・{(x.sp || []).join("、")} 分攤 
+          <a href="#" data-del="\${x.id}" style="color:red; margin-left:8px;">刪除</a>
+        </div>
+      </div>
+    `).join("")}
+  `;
+}
+
+// 5. 監聽 Firebase 雲端資料庫（核心：秒級即時更新）
+function listenDatabase() {
+  // 監聽匯率
+  onValue(ref(db, `rooms/${roomId}/rate`), (snapshot) => {
+    const val = snapshot.val();
+    if (val) {
+      rate = val;
+      render();
+    }
+  });
+
+  // 監聽所有記帳紀錄
+  onValue(ref(db, `rooms/${roomId}/records`), (snapshot) => {
+    const data = snapshot.val();
+    X = [];
+    if (data) {
+      Object.keys(data).forEach(key => {
+        X.push({ id: key, ...data[key] });
+      });
+    }
+    render();
+  });
+}
+
+// 複製文字功能
+async function copy(t) {
+  try { await navigator.clipboard.writeText(t); return true; } catch (x) { return false; }
+}
+
+// 事件處理（新增、刪除、複製）
+document.addEventListener("click", async ev => {
+  const t = ev.target;
+  
+  // A. 新增紀錄到雲端
+  if (t.id == "add") {
+    const a = +\$("#a").value, sp = [...document.querySelectorAll(".sp:checked")].map(x => x.value);
+    if (a > 0 && sp.length) {
+      const recordsRef = ref(db, `rooms/${roomId}/records`);
+      const newRecordRef = push(recordsRef);
+      await set(newRecordRef, {
+        d: \$("#d").value || "花費",
+        amt: a,
+        cur: \$("#c").value,
+        by: \$("#by").value,
+        sp: sp,
+        ts: Date.now()
+      });
+      msg = "";
+    } else {
+      msg = "請填金額並至少勾選一位分攤成員";
+      render();
+    }
+  }
+  
+  // B. 📥 包車訂金快速鍵
+  if (t.id == "dep") {
+    // 寫入固定 ID 的包車訂金
+    await set(ref(db, `rooms/${roomId}/records/charter-dep`), {
+      d: "包車訂金（Anita 已付）",
+      amt: 900,
+      cur: "TWD",
+      by: "ANITA",
+      sp: N.slice(),
+      ts: Date.now()
+    });
+  }
+  
+  // C. 從雲端刪除紀錄
+  if (t.dataset.del) {
+    ev.preventDefault();
+    if(confirm("確定要刪除這筆花費嗎？")) {
+      await set(ref(db, `rooms/${roomId}/records/${t.dataset.del}`), null);
+    }
+  }
+  
+  // D. 複製功能
+  if (t.id == "cp") {
+    const ok = await copy(text());
+    t.textContent = ok ? "已複製 ✓" : "複製失敗";
+    setTimeout(() => t.textContent = "複製結算文字", 2000);
+  }
+});
+
+// 匯率即時連動上傳
+document.addEventListener("input", async ev => {
+  if (ev.target.id == "rt" && +ev.target.value > 0) {
+    await set(ref(db, `rooms/${roomId}/rate`), +ev.target.value);
+  }
+});
+
+// 網頁載入流程啟動
+window.addEventListener("DOMContentLoaded", async () => {
+  render(); // 預先渲染初版 UI
+  await initLiff(); // 啟動 LINE 連動
+  listenDatabase(); // 開啟雲端資料同步監聽
+});
+</script>
+</main></body></html>
