@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>石垣島・沖繩 旅遊手冊</title>
+<style>
+:root{--bg:#f6f8fb;--card:#fff;--tx:#1b2430;--mu:#6b7686;--ac:#0a7ea4;--bd:#e1e6ee;--hl:#e6f4f9;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10151c;--card:#1a212b;--tx:#e8edf3;--mu:#93a0b2;--ac:#4cc3e8;--bd:#2a3340;--hl:#16303a}}
+:root[data-theme="dark"]{--bg:#10151c;--card:#1a212b;--tx:#e8edf3;--mu:#93a0b2;--ac:#4cc3e8;--bd:#2a3340;--hl:#16303a}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.55 -apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;padding-bottom:70px}
+header{padding:14px 16px 4px}h1{font-size:19px;margin:0}header small{color:var(--mu)}
+main{padding:8px 12px;max-width:640px;margin:auto}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;border:0;background:none;color:var(--mu);padding:8px 0;font-size:11px}nav button b{display:block;font-size:18px}nav .on{color:var(--ac);font-weight:700}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:10px 0}
+.tap{cursor:pointer}.card.next{background:var(--hl);border-color:var(--ac)}
+.t{color:var(--ac);font-weight:700}.mu{color:var(--mu);font-size:13px}
+.days{display:flex;gap:6px;overflow-x:auto;padding:4px 0}
+.days button,.btn{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:18px;padding:6px 12px;font-size:14px;white-space:nowrap;text-decoration:none;display:inline-block}
+.days .on,.btn.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+input,textarea,select{width:100%;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit;margin:3px 0}
+.row{display:flex;gap:6px;align-items:center}.row>*{flex:1}.row>.s{flex:0 0 auto}
+.jp b{font-size:18px;display:block}.jp .r{color:var(--mu);font-size:13px}
+.flag{background:var(--hl);border-radius:8px;padding:8px;font-size:13px;margin:8px 0}
+h2{font-size:16px;margin:14px 2px 4px}
+</style></head><body>
+<header><h1>🌺 石垣島・沖繩 12/18–12/22</h1><small id="who">登入中…</small></header>
+<main id="m"></main>
+<nav id="nav"></nav>
+<script>
+const D=[
+{k:"12/18",w:"五",i:[
+{t:"06:35",n:"虎航 IT736 桃園T1→石垣",a:"新石垣空港",x:"08:35抵達，行李15kg"},
+{t:"中午",n:"公設市場午餐",tr:"機場→市區 約30分",a:"石垣市公設市場"},
+{t:"12:15",n:"到東橫INN寄放行李",tr:"市場→飯店 約5–10分",a:"東橫INN 沖繩石垣島",x:"先寄放行李（尚未到入住時間），再步行去碼頭集合",link:"https://share.google/Tulij1gibh0yhay02"},
+{t:"13:00",n:"幻影島＋竹富島觀光",tr:"從飯店步行約12分",a:"石垣港離島碼頭",x:"集合：石垣港離島碼頭；約3.5小時，16:00結束",c:1},
+{t:"晚餐",n:"YAKINIKU USHIGAKI（石垣牛）",tr:"市區內 約10–15分",a:"YAKINIKU USHIGAKI 石垣島",x:"⚠️ 11/18 要訂位",link:"https://share.google/GJzoAS2NB764uV4Xa"},
+{t:"住宿",n:"東橫INN 沖繩石垣島",tr:"市區內 約10分",a:"東橫INN 沖繩石垣島",link:"https://share.google/Tulij1gibh0yhay02"}]},
+{k:"12/19",w:"六",i:[
+{t:"早上",n:"行李暫放東橫INN",a:"東橫INN 沖繩石垣島",x:"走路12分鐘至石垣港離島碼頭"},
+{t:"08:50",n:"集合：石垣港離島碼頭正門",tr:"自飯店步行12分",a:"石垣港離島碼頭",x:"川平灣行程共6小時",c:1},
+{t:"09:15",n:"石垣島鍾乳洞",tr:"約25分（依行程表）",a:"石垣島鍾乳洞",x:"約50分鐘"},
+{t:"10:15",n:"八重山村 Yaima Village",tr:"約10分",a:"Yaima Village 石垣島",x:"約90分鐘"},
+{t:"11:45",n:"川平灣",tr:"含於停留時間，約20分",a:"川平灣",x:"約60分鐘；可自費搭玻璃船"},
+{t:"13:25",n:"玉取崎展望台",tr:"約40分",a:"玉取崎展望台",x:"約35分鐘"},
+{t:"14:35",n:"石垣港離島碼頭（下車）",tr:"約35分（依行程表）",a:"石垣港離島碼頭"},
+{t:"晚餐",n:"公園茶屋",tr:"市區內 約10分",a:"公園茶屋 石垣島",link:"https://share.google/HXPQTOA0mcez4MZOK"},
+{t:"住宿",n:"石垣海濱飯店",tr:"市區內 約10分",a:"石垣海濱飯店",link:"https://www.ishigaki-seasidehotel.com/"}]},
+{k:"12/20",w:"日",i:[
+{t:"中午",n:"旬家",tr:"市區內 約10分",a:"旬家 石垣島",link:"https://share.google/9fEoZ9FWF0A87OdWj"},
+{t:"14:30",n:"全日空 NH1770 石垣→沖繩",tr:"市區→新石垣空港 約30分",a:"新石垣空港",x:"15:30抵達，行李23kg"},
+{t:"16:45",n:"到OMO5 辦理入住／放行李",tr:"機場→牧志 單軌約15–20分，再步行約10分",a:"OMO5 沖繩那霸",x:"15:30抵達、領行李後約16:45到；先放行李再出門吃晚餐"},
+{t:"晚餐",n:"燒肉 琉球之牛 那霸國際通（3F）",tr:"飯店→國際通 步行約5–10分",a:"琉球之牛 國際通"},
+{t:"晚上",n:"逛國際通",tr:"步行約3分",a:"那霸 國際通"},
+]},
+{k:"12/21",w:"一",i:[
+{t:"07:45",n:"沖繩飯糰：牧志市場總店（Potama）",tr:"OMO5→牧志市場 步行約10分",a:"ポークたまごおにぎり 本店 牧志",x:"約30–40分，要排隊；各來源營業時間不一（07:00或08:00起），請先確認，開店晚則包車出發順延；飯糰可帶上車吃"},
+{t:"08:30",n:"OMO5 集合・包車出發",a:"OMO5 沖繩那霸",x:"三八旅客包車：8小時 ¥27,000；出發時間為建議，請與司機確認；尾款每人 ¥5,750 現金",c:1},
+{t:"10:15",n:"古宇利大橋（拍照）",tr:"那霸→古宇利 約1小時30–45分",a:"古宇利大橋",x:"約30分"},
+{t:"10:45",n:"古宇利島：蝦蝦飯午餐",tr:"約5分",a:"古宇利島 蝦蝦飯",x:"約75分；人氣店會排隊"},
+{t:"12:00",n:"古宇利島：現刨黑糖冰",tr:"約5分",a:"古宇利島 黑糖剉冰",x:"約30分；12:30 出發"},
+{t:"13:45",n:"美國村",tr:"古宇利→美國村 約1小時15分",a:"美國村 北谷",x:"約60分；14:45 出發"},
+{t:"15:35",n:"波上宮",tr:"美國村→波上宮 約50分",a:"波上宮 那霸",x:"約30分"},
+{t:"16:30",n:"PARCO CITY（包車結束）",tr:"波上宮→PARCO CITY 約25–30分",a:"PARCO CITY 沖繩",x:"晚餐；包車全程約8小時",link:"https://share.google/nJpYoYgbGtHat1cTH"},
+{t:"晚上",n:"新都心（可選，自行前往）",tr:"PARCO CITY→新都心 計程車約15–20分",a:"那霸 新都心 おもろまち",x:"逛街購物"},
+{t:"住宿",n:"OMO5 沖繩那霸",a:"OMO5 沖繩那霸"}]},
+{k:"12/22",w:"二",i:[
+{t:"08:15",n:"樂桃 MM921 沖繩→桃園T1（ANITA、小美）",tr:"飯店→機場 單軌/計程車約20分；國際線建議06:15前到機場，首班車請先確認",a:"那霸機場",x:"08:55抵達；個人行李20kg"},
+{t:"16:50",n:"樂桃 MM929 沖繩→桃園（宜宜、Kelly）",tr:"飯店→機場 約20分",a:"那霸機場",x:"17:35抵達；建議14:50前到機場；加購行李+1；上午可自由活動"}]}];
+const FL=[["12/18","虎航 IT736","桃園T1 06:35 → 石垣 08:35","15kg","全員"],["12/20","全日空 NH1770","石垣 14:30 → 沖繩 15:30","23kg","全員"],["12/22","樂桃 MM921","沖繩 08:15 → 桃園T1 08:55","20kg","ANITA、小美"],["12/22","樂桃 MM929","沖繩 16:50 → 桃園 17:35","加購行李 +1","宜宜、Kelly"]];
+const HT=[["12/18","東橫INN 沖繩石垣島"],["12/19","石垣海濱飯店"],["12/20–22","OMO5 沖繩那霸 by 星野集團"]];
+const JP=[["你好","こんにちは","Konnichiwa"],["謝謝","ありがとうございます","Arigatou gozaimasu"],["不好意思／請問","すみません","Sumimasen"],["多少錢？","いくらですか？","Ikura desu ka?"],["可以刷卡嗎？","カードは使えますか？","Kaado wa tsukaemasu ka?"],["請給我這個","これをください","Kore o kudasai"],["有中文菜單嗎？","中国語のメニューはありますか？","Chuugokugo no menyuu wa arimasu ka?"],["我有訂位","予約しています","Yoyaku shiteimasu"],["○位","○名です","○ mei desu"],["請結帳","お会計をお願いします","Okaikei o onegaishimasu"],["廁所在哪裡？","トイレはどこですか？","Toire wa doko desu ka?"],["車站／碼頭在哪裡？","駅／港はどこですか？","Eki / Minato wa doko desu ka?"],["請問怎麼去這裡？","ここへの行き方を教えてください","Koko e no ikikata o oshiete kudasai"],["可以幫我拍照嗎？","写真を撮っていただけますか？","Shashin o totte itadakemasu ka?"],["我會過敏／不吃…","アレルギーがあります","Arerugii ga arimasu"],["可以退稅嗎？","免税できますか？","Menzei dekimasu ka?"],["請幫我叫計程車","タクシーを呼んでください","Takushii o yonde kudasai"],["我迷路了","道に迷いました","Michi ni mayoimashita"],["請幫幫我","助けてください","Tasukete kudasai"],["好吃！","おいしいです！","Oishii desu!"],["這個有別的尺寸／顏色嗎？","これの他のサイズ／色はありますか？","Kore no hoka no saizu / iro wa arimasu ka?","購物"],["可以試穿嗎？","試着してもいいですか？","Shichaku shite mo ii desu ka?","購物"],["有庫存嗎？","在庫はありますか？","Zaiko wa arimasu ka?","購物"],["可以用這張優惠券嗎？","このクーポンは使えますか？","Kono kuupon wa tsukaemasu ka?","購物"],["免稅櫃檯在哪裡？","免税カウンターはどこですか？","Menzei kauntaa wa doko desu ka?","購物"],["我要免稅，這是護照","免税でお願いします。パスポートです","Menzei de onegaishimasu. Pasupooto desu","購物"],["請分開包裝","別々に包んでください","Betsubetsu ni tsutsunde kudasai","購物"],["不用袋子／需要袋子","袋は要りません／要ります","Fukuro wa irimasen / irimasu","購物"],["請給我收據","レシートをください","Reshiito o kudasai","購物"],["可以試吃嗎？","試食できますか？","Shishoku dekimasu ka?","購物"],["請載我到這裡（給司機看地圖）","ここまでお願いします","Koko made onegaishimasu","交通"],["大概要多久？","どのくらいかかりますか？","Dono kurai kakarimasu ka?","交通"],["請在這裡停車","ここで止めてください","Koko de tomete kudasai","交通"],["可以刷卡付車資嗎？","カードで払えますか？","Kaado de haraemasu ka?","交通"],["可以請您稍等一下嗎？","少し待っていただけますか？","Sukoshi matte itadakemasu ka?","交通"],["集合是幾點？","集合は何時ですか？","Shuugou wa nanji desu ka?","交通"],["行李可以放後車廂嗎？","荷物をトランクに入れてもいいですか？","Nimotsu o toranku ni irete mo ii desu ka?","交通"],["○○在哪裡？","○○はどこですか？","○○ wa doko desu ka?","問路"],["離這裡遠嗎？","ここから遠いですか？","Koko kara tooi desu ka?","問路"],["走路要幾分鐘？","歩いて何分ですか？","Aruite nanpun desu ka?","問路"],["直走／右轉／左轉","まっすぐ／右／左","Massugu / migi / hidari","問路"],["可以在地圖上指給我看嗎？","地図で教えてください","Chizu de oshiete kudasai","問路"],["最近的車站／便利商店在哪？","一番近い駅／コンビニはどこですか？","Ichiban chikai eki / konbini wa doko desu ka?","問路"],["這班公車有到○○嗎？","このバスは○○に行きますか？","Kono basu wa ○○ ni ikimasu ka?","公共運輸"],["要在哪裡搭車？","どこで乗りますか？","Doko de norimasu ka?","公共運輸"],["下一班是幾點？","次のバスは何時ですか？","Tsugi no basu wa nanji desu ka?","公共運輸"],["車票在哪裡買？","切符はどこで買えますか？","Kippu wa doko de kaemasu ka?","公共運輸"],["到○○要在哪裡下車？","○○はどこで降りますか？","○○ wa doko de orimasu ka?","公共運輸"],["末班車是幾點？","最終は何時ですか？","Saishuu wa nanji desu ka?","公共運輸"],["有一日券嗎？","一日乗車券はありますか？","Ichinichi joshaken wa arimasu ka?","公共運輸"],["船票／渡輪售票處在哪？","乗船券売り場はどこですか？","Joosenken uriba wa doko desu ka?","公共運輸"]];
+const NAMES=["ANITA","Kelly","小美","宜宜"];
+const BK=[["yaki","餐廳","12/18 晚餐","YAKINIKU USHIGAKI（石垣牛）","⚠️ 11/18 開放訂位，請記得訂"],["ph","門票/行程","12/18 13:00","幻影島＋竹富島觀光","集合：石垣港離島碼頭，約3.5小時"],["kb","門票/行程","12/19 08:50","川平灣行程（6H）","08:50 離島碼頭正門集合；玻璃船為現場自費"],["gy","餐廳","12/19 晚餐","公園茶屋",""],["sj","餐廳","12/20 午餐","旬家",""],["rq","餐廳","12/20 晚餐","燒肉 琉球之牛 那霸國際通（3F）",""],["cc","包車","12/21 全天","包車：古宇利島→美國村→波上宮→PARCO CITY","三八旅客包車・4人五人座日本司機・8小時¥27,000｜訂金NT$900已由Anita付（每人NT$225）｜當天尾款每人¥5,750"],["pc","餐廳","12/21 晚餐","PARCO CITY",""]];
+const ST=["未確認","待訂位","已訂位","不需訂位"];
+const PACK=["護照","機票/電子登機證","日幣現金","信用卡","網卡/eSIM","行動電源","充電線/轉接頭","防曬乳/泳衣","常備藥","雨具","換洗衣物","盥洗用品"];
+const $=s=>document.querySelector(s),e=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const mq=a=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(a);
+let tab="trip",day=0,db=null,uid=null,members={},exps=[],cps=[],bks={},rinfo={},me={tickets:"",notes:"",pack:{}},rate=+(localStorage.rate||0.21),myName="";
+const now=new Date(),tk=String(now.getMonth()+1).padStart(2,"0")+"/"+String(now.getDate()).padStart(2,"0");
+if(D.findIndex(d=>d.k==tk)>=0)day=D.findIndex(d=>d.k==tk);
+const T=[["trip","📅","行程"],["go","✈️","交通住宿"],["bk","📝","訂位"],["cp","🎫","優惠"],["pay","💴","記帳"],["jp","🗣️","日語"],["me","👤","我的"]];
+$("#nav").innerHTML=T.map(t=>`<button data-t="${t[0]}"><b>${t[1]}</b>${t[2]}</button>`).join("");
+$("#nav").onclick=ev=>{const b=ev.target.closest("button");if(b){tab=b.dataset.t;det=-1;render()}};
+function mapLink(a,o){return `<a class="btn" target="_blank" href="${o?"https://www.google.com/maps/dir/?api=1&origin="+encodeURIComponent(o)+"&destination="+encodeURIComponent(a):mq(a)}">${o?"🧭 路線":"📍 地圖"}</a>`}
+function trip(){const d=D[day];let h=`<div class="days">${D.map((x,i)=>`<button class="${i==day?"on":""}" data-d="${i}">${x.k}(${x.w})</button>`).join("")}</div>`;
+h+=`<div class="mu">👆 點一下行程可看詳細內容</div><div class="flag">🌤️ 當地天氣：<a target="_blank" href="https://www.google.com/search?q=${encodeURIComponent((day<2?"石垣島":"那霸")+" 今日天氣")}">查看${day<2?"石垣島":"那霸"}今日天氣與氣溫</a>（App 無法直接連網取得即時資料）</div>`;
+d.i.forEach((s,i)=>{const nx=d.i[i+1],pv=d.i[i-1];h+=`<div class="card tap ${s.c?"next":""}" data-i="${i}"><span class="t">${e(s.t)}</span> <b>${e(s.n)}</b>${s.c?" 〔集合/出發〕":""}
+${s.x?`<div class="mu">${e(s.x)}</div>`:""}${s.tr?`<div class="mu">🚗 前往此站：${e(s.tr)}（預估，實際請按「路線」）</div>`:""}<div class="mu">📮 ${e(s.a)}　☎️ 電話請見 Google 地圖</div>
+<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">${mapLink(s.a)}${pv?mapLink(s.a,pv.a):""}${s.link?`<a class="btn" target="_blank" href="${e(s.link)}">ℹ️ 資訊</a>`:""}</div>
+${nx?`<div class="mu" style="margin-top:6px">➡️ 下一站：${e(nx.t)} ${e(nx.n)}</div>`:`<div class="mu" style="margin-top:6px">🏁 今日最後一站</div>`}</div>`});return h}
+function go(){return `<h2>航班（共用）</h2>`+FL.map(f=>`<div class="card"><span class="t">${f[0]}</span> <b>${f[1]}</b><div class="mu">${f[2]}・行李 ${f[3]}</div><div class="mu">👥 ${f[4]}</div></div>`).join("")+`<h2>住宿</h2>`+HT.map(f=>`<div class="card"><span class="t">${f[0]}</span> <b>${f[1]}</b><div class="mu"><a target="_blank" href="${mq(f[1])}">📍 地圖</a></div></div>`).join("")+`<h2>入境流程（參考）</h2><div class="card"><div class="mu">本團 12/18 從桃園直飛石垣島，入境審查與海關在石垣機場辦理，流程與那霸相同。12/20 石垣→沖繩為國內線，抵達那霸不需入境。</div>
+<ol style="padding-left:20px;margin:8px 0"><li>跟著「入境 Arrivals」指示牌走</li><li>在機器掃描護照</li><li>入境審查：護照＋VJW QR Code＋指紋，或填紙本入境卡</li><li>先通過入境審查，再到行李區上廁所、等託運行李</li><li>海關申報：護照＋VJW QR Code，或紙本海關申報單</li></ol><div class="mu">VJW（Visit Japan Web）建議出發前先填好並截圖 QR Code。</div></div><h2>地面交通</h2><div class="card">12/19 石垣港離島碼頭步行約12分（東橫INN）<br>12/21 三八旅客包車（8小時）：古宇利島→美國村→波上宮→PARCO CITY</div><div class="mu">個人機票與訂位代號請放在「我的」頁，只有自己看得到。</div>`}
+const CP=[["BicCamera／KOJIMA","免稅10%＋藥品化妝品再享5% OFF；相機、手錶、家電、玩具7% OFF；日本清酒3% OFF（獺祭、八海山除外）。須同時掃描券上兩條條碼；部分商品不適用（如Apple、Grand Seiko等）。","⚠️ 券面有效期限至 2026/10/31，早於本團旅程，出發前請確認有沒有新版"],["EDION 愛電王","免稅最大10%；家電、手錶、相機、不鏽鋼真空杯7% OFF，或食品、藥品、化妝品5% OFF（擇一）。結帳前出示並掃描兩條條碼，不可與其他優惠併用。","⚠️ 券面有效期限至 2026/10/31，早於本團旅程，出發前請確認有沒有新版"],["札幌藥妝 Sapporo Drug Store","免稅10%＋5% BONUS；不含稅購物滿¥38,888以上，免稅10%＋7% BONUS。結帳前出示護照和優惠券，不能與其他優惠併用，部分商品不適用。","券面未標示期限，請至官網確認適用門市與期限：satudora-taxfree.jp"]];
+function cpn(){return `<div class="mu">優惠券需掃描條碼，請用原圖在店內出示；這裡只整理重點。</div>`+CP.map(c=>`<div class="card"><b>${e(c[0])}</b><div>${e(c[1])}</div><div class="mu" style="margin-top:4px">${e(c[2])}</div></div>`).join("")+(db?`<div class="card"><b>新增優惠</b><input id="cn" placeholder="店家／景點"><input id="cd" placeholder="優惠內容（例：出示此頁9折）"><button class="btn p" id="ca">新增</button></div>`+cps.map(c=>`<div class="card"><b>${e(c.n)}</b><div>${e(c.d)}</div><button class="btn" data-dc="${c.id}">刪除</button></div>`).join(""):"")}
+const J=x=>x.cur=="TWD"?x.amt/rate:x.amt;
+function bal(){const b={};Object.keys(members).forEach(k=>b[k]=0);exps.forEach(x=>{const p=(x.sp||[]).filter(k=>k in members);if(!p.length)return;b[x.by]=(b[x.by]||0)+J(x);p.forEach(k=>b[k]=(b[k]||0)-J(x)/p.length)});return b}
+function pay(){return `<div class="card"><b>記帳分帳</b><div class="mu">記帳分帳是獨立頁面，請從 LINE 開啟，全員即時同步。</div><a class="btn p" href="https://liff.line.me/2011929552-o4OCxhhm" style="margin-top:8px">開啟記帳分帳（LINE）→</a></div>`}
+function bk(){const L=BK.map(b=>({key:b[0],ty:b[1],dt:b[2],n:b[3],nt:b[4],...(bks[b[0]]||{})})).concat(Object.entries(bks).filter(([k,v])=>v.custom).map(([k,v])=>({key:k,...v})));
+return `<div class="card"><b>新增訂位／門票</b><input id="bn" placeholder="名稱（餐廳／門票）"><input id="bd" placeholder="日期時間（例：12/20 18:00）"><button class="btn p" id="ba">新增</button></div>`+L.map(b=>`<div class="card"><span class="t">${e(b.dt)}</span> <b>${e(b.n)}</b> <span class="mu">${e(b.ty||"")}</span>${b.nt?`<div class="mu">${e(b.nt)}</div>`:""}
+<div class="row"><select data-bk="${b.key}" data-f="st">${ST.map(s=>`<option ${s==(b.st||"未確認")?"selected":""}>${s}</option>`).join("")}</select><input data-bk="${b.key}" data-f="code" value="${e(b.code||"")}" placeholder="訂位代號／人數／備註"></div></div>`).join("")}
+let jc="全部",det=-1;
+const JC=["全部","日常","購物","交通","問路","公共運輸"];
+function toast(m){let x=document.getElementById("ts");if(!x){x=document.createElement("div");x.id="ts";x.style.cssText="position:fixed;left:12px;right:12px;bottom:80px;background:#222;color:#fff;padding:10px;border-radius:10px;z-index:9;font-size:14px";document.body.appendChild(x)}x.textContent=m;x.style.display="block";clearTimeout(x._t);x._t=setTimeout(()=>x.style.display="none",3500)}
+function say(t){const S=window.speechSynthesis;if(!S){toast("此瀏覽器不支援語音播放");return}S.cancel();const u=new SpeechSynthesisUtterance(t.replace(/○+/g,"").replace(/／/g,"、"));u.lang="ja-JP";u.rate=.85;const vs=S.getVoices(),v=vs.find(v=>/^ja/i.test(v.lang));if(v)u.voice=v;else if(vs.length)toast("找不到日語語音，請到手機設定下載日語語音");S.speak(u)}
+const jcard=i=>{const p=JP[i];return `<div class="card jp" data-j="${i}"><button class="btn" data-say="${i}" style="float:right;padding:4px 12px">🔊</button><span class="mu">${e(p[0])}</span><b>${e(p[1])}</b><span class="r">${e(p[2])}</span></div>`};
+function jp(){return `<div class="days">${JC.map(c=>`<button data-jc="${c}" class="${c==jc?"on":""}">${c}</button>`).join("")}</div><div class="mu">點卡片放大，按 🔊 播放日語發音</div>`+JP.map((p,i)=>i).filter(i=>jc=="全部"||(JP[i][3]||"日常")==jc).map(jcard).join("")}
+function typ(s){return /航|NH1770|IT736|MM9/.test(s.n)?"air":(s.t=="住宿"||/寄放|辦理入住/.test(s.n))?"hotel":(/餐|飯|冰|燒肉|茶屋|旬家|YAKINIKU/.test(s.n)||/晚餐/.test(s.x||""))?"food":"sight"}
+function detail(){const d=D[day],s=d.i[det],pv=d.i[det-1],nx=d.i[det+1],ty=typ(s);
+const tip={air:"國際線建議提前約2小時、國內線約1小時到機場；行李額度見「交通住宿」頁。",food:"人氣店常需排隊，建議提早到；先確認是否需訂位（見「訂位」頁），結帳前可先問能不能刷卡。",hotel:"未到入住時間可先寄放行李；入住需出示護照。",sight:"注意集合與出發時間；戶外行程建議帶防曬與雨具，天候可能影響行程。"}[ty];
+const cat={air:"公共運輸",food:"日常",hotel:"日常",sight:"問路"}[ty];
+const ps=JP.map((p,i)=>i).filter(i=>(JP[i][3]||"日常")==cat).slice(0,3);
+return `<button class="btn" id="dback">← 返回 ${d.k} 行程</button><div class="card ${s.c?"next":""}"><span class="t">${e(s.t)}</span><h2 style="margin:2px 0 8px">${e(s.n)}${s.c?" 〔集合/出發〕":""}</h2>
+${s.x?`<div>📝 ${e(s.x)}</div>`:""}${s.tr?`<div>🚗 前往此站：${e(s.tr)}<span class="mu">（預估）</span></div>`:""}<div>📮 ${e(s.a)}</div><div>☎️ 電話與營業時間：按「地圖」進 Google 地圖，可一鍵撥打</div>
+<div style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap">${mapLink(s.a)}${pv?mapLink(s.a,pv.a):""}${s.link?`<a class="btn" target="_blank" href="${e(s.link)}">ℹ️ 資訊</a>`:""}</div>
+<div class="mu">${pv?`⬅️ 上一站：${e(pv.t)} ${e(pv.n)}`:"🏁 今日第一站"}</div><div class="mu">${nx?`➡️ 下一站：${e(nx.t)} ${e(nx.n)}`:"🏁 今日最後一站"}</div>
+<div style="margin-top:8px;display:flex;gap:6px">${pv?`<button class="btn" data-nav="-1">← 上一站</button>`:""}${nx?`<button class="btn p" data-nav="1">下一站 →</button>`:""}</div></div>
+<div class="card"><b>小提醒</b><div>${tip}</div></div><h2>相關日語（${cat}）</h2>${ps.map(jcard).join("")}<button class="btn" data-jc="${cat}" data-go="jp">看更多日語 →</button>`}
+function mine(){if(!unl){return localStorage.pin?`<div class="card"><b>🔒 輸入 PIN</b><input id="pi" type="password" inputmode="numeric" maxlength="6" placeholder="PIN"><button class="btn p" id="pu">解鎖</button><div class="mu" id="pm"></div></div>`:`<div class="card"><b>設定 4–6 位數 PIN</b><input id="pn" type="password" inputmode="numeric" maxlength="6" placeholder="PIN"><button class="btn p" id="ps">設定並進入</button><div class="mu" id="pm">PIN 與內容只存在這支手機，忘了無法找回；只能擋一般翻看，請勿放護照號碼等敏感資料。</div></div>`}
+return `<div class="card"><b>我的機票／訂位代號</b><textarea id="tkt" rows="4" placeholder="航班、訂位代號、行李…（只存在這支手機）">${e(me.tickets)}</textarea></div>
+<div class="card"><b>攜帶物品</b>${PACK.map(p=>`<label style="display:block"><input type="checkbox" style="width:auto" data-p="${e(p)}" ${me.pack[p]?"checked":""}> ${e(p)}</label>`).join("")}</div>
+<div class="card"><b>個人筆記</b><textarea id="nt" rows="5">${e(me.notes)}</textarea></div><button class="btn" id="lk">🔒 鎖定</button>`}
+function render(){document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t==tab));
+const need=["pay","me","bk"].includes(tab)&&!db;
+$("#m").innerHTML=need?`<div class="card">此功能需要登入 claude.ai 帳號後才能使用（共用與個人資料皆存於雲端）。</div>`:(tab=="trip"&&det>=0?detail():({trip,go,bk,cp:cpn,pay,jp,me:mine}[tab])())}
+async function save(){if(db)try{await db.collection("data/users/"+uid).doc("me").set(me)}catch(x){}}
+document.addEventListener("click",async ev=>{const t=ev.target,d=t.dataset;
+if(t.id=="ps"){const v=$("#pn").value;if(/^\d{4,6}$/.test(v)){localStorage.pin=hs(v);unl=true;render()}else $("#pm").textContent="請輸入 4–6 位數字"}
+if(t.id=="pu"){if(hs($("#pi").value)==localStorage.pin){unl=true;render()}else $("#pm").textContent="PIN 不正確"}
+if(t.id=="lk"){unl=false;render()}
+if(d.d!==undefined){day=+d.d;det=-1;render()}
+if(d.jc){jc=d.jc;if(d.go){tab="jp";det=-1}render();scrollTo(0,0)}
+if(d.nav){det+=+d.nav;render();scrollTo(0,0)}
+if(t.id=="dback"){det=-1;render()}
+const tc=t.closest(".tap");if(tc&&!t.closest("a,button")){det=+tc.dataset.i;render();scrollTo(0,0)}
+const sb=t.closest("[data-say]");if(sb){say(JP[sb.dataset.say][1]);return}
+const jz=t.closest("[data-j]");if(jz){const n=jz.dataset.j,p=JP[n];jz.innerHTML=`<button class="btn p" data-say="${n}" style="float:right">🔊 播放</button><div style="font-size:30px;font-weight:700;padding:16px 0">${e(p[1])}</div><div class="mu">${e(p[0])}・${e(p[2])}</div>`;jz.removeAttribute("data-j")}
+if(t.id=="ba"&&$("#bn").value){const id="u"+Date.now();await db.collection("bookings").doc(id).set({custom:1,n:$("#bn").value,dt:$("#bd").value,ty:"自訂",st:"未確認"})}
+if(t.id=="chg"){const a=Object.keys(members).find(k=>members[k]=="ANITA");if(!a){t.textContent="請先請 ANITA 到「我的」選擇名字";return}await db.collection("expenses").doc("charter-dep").set({by:a,sp:Object.keys(members),ts:Date.now(),d:"包車訂金（Anita 已付）",amt:900,cur:"TWD"});await db.collection("expenses").doc("charter-fare").delete().catch(()=>{})}
+if(t.id=="ca"&&$("#cn").value){const id="c"+Date.now();await db.collection("coupons").doc(id).set({n:$("#cn").value,d:$("#cd").value})}
+if(d.dc)await db.collection("coupons").doc(d.dc).delete();
+if(t.id=="ex"){const a=+$("#ea").value,sp=[...document.querySelectorAll(".sp:checked")].map(x=>x.value);if(a>0&&sp.length){const id="e"+Date.now();await db.collection("expenses").doc(id).set({d:$("#ed").value||"花費",amt:a,by:uid,sp,cur:$("#ec").value,ts:Date.now()})}}
+if(d.de){ev.preventDefault();await db.collection("expenses").doc(d.de).delete()}});
+document.addEventListener("change",async ev=>{const t=ev.target;
+if(t.id=="nm"&&t.value)await db.collection("members").doc(uid).set({name:t.value});
+if(t.dataset.bk){const o={...(bks[t.dataset.bk]||{}),[t.dataset.f]:t.value};await db.collection("bookings").doc(t.dataset.bk).set(o)}
+if(t.id=="rt"&&+t.value>0)await db.collection("settings").doc("rate").set({v:+t.value,by:uid,ts:Date.now()})});
+document.addEventListener("input",ev=>{const t=ev.target;
+if(t.id=="rt"&&+t.value>0){rate=+t.value}
+if(t.id=="jy")$("#jo").textContent=t.value?"≈ NT$ "+Math.round(t.value*rate).toLocaleString():"";
+if(t.id=="tkt"){me.tickets=t.value;save()}if(t.id=="nt"){me.notes=t.value;save()}
+if(t.dataset.p){me.pack[t.dataset.p]=t.checked;save()}});
+const LDB=(()=>{const K="tripdb",ld=()=>{try{return JSON.parse(localStorage.getItem(K))||{}}catch(x){return{}}},sv=o=>{try{localStorage.setItem(K,JSON.stringify(o))}catch(x){}},L={};
+const snap=c=>({docs:Object.entries(ld()[c]||{}).map(([id,v])=>({id,data:()=>v}))});
+const fire=(c,id)=>{(L[c]||[]).forEach(f=>f(snap(c)));(L[c+"/"+id]||[]).forEach(g=>g())};
+return{collection:c=>({doc:id=>({set:async v=>{const o=ld();(o[c]=o[c]||{})[id]=v;sv(o);fire(c,id)},delete:async()=>{const o=ld();if(o[c])delete o[c][id];sv(o);fire(c,id)},onSnapshot:f=>{const g=()=>{const v=(ld()[c]||{})[id];f({exists:!!v,data:()=>v})};(L[c+"/"+id]=L[c+"/"+id]||[]).push(g);g()}}),onSnapshot:f=>{(L[c]=L[c]||[]).push(f);f(snap(c))}})}})();
+const claude={use:async n=>n=="user"?{id:async()=>"local"}:LDB};
+let unl=false;const hs=p=>{let h=0;for(const c of p)h=(h*31+c.charCodeAt(0))>>>0;return String(h)};
+(async()=>{render();try{
+const u=await claude.use("user");uid=u?await u.id():null;db=await claude.use("db");
+if(!db||!uid){$("#who").textContent="未登入（僅可瀏覽行程）";render();return}
+$("#who").textContent="本機模式：資料只存在這支手機";
+db.collection("members").onSnapshot(s=>{members={};s.docs.forEach(d=>members[d.id]=d.data().name||"成員");myName=members[uid]||"";if(tab!="me"||!document.activeElement.matches("input,textarea"))render()});
+db.collection("expenses").onSnapshot(s=>{exps=s.docs.map(d=>({id:d.id,...d.data()}));if(tab=="pay"&&document.activeElement.tagName!="INPUT")render()});
+db.collection("bookings").onSnapshot(s=>{bks={};s.docs.forEach(d=>bks[d.id]=d.data());if(tab=="bk"&&!document.activeElement.matches("input,select"))render()});
+db.collection("settings").doc("rate").onSnapshot(s=>{if(s.exists){rinfo=s.data();rate=rinfo.v;if(tab=="pay"&&document.activeElement.tagName!="INPUT")render()}});
+db.collection("coupons").onSnapshot(s=>{cps=s.docs.map(d=>({id:d.id,...d.data()}));if(tab=="cp"&&document.activeElement.tagName!="INPUT")render()});
+db.collection("data/users/"+uid).doc("me").onSnapshot(s=>{if(s.exists&&!me.loaded){me={tickets:"",notes:"",pack:{},...s.data(),loaded:1};if(tab=="me")render()}});
+}catch(x){$("#who").textContent="離線模式"}})();
+</script></body></html>
