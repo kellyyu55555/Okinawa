@@ -43,27 +43,47 @@ const J = x => x.cur == "TWD" ? x.amt / rate : x.amt;
 const fy = n => "¥" + Math.round(n).toLocaleString();
 const ft = n => "NT$" + Math.round(n * rate).toLocaleString();
 
-function calc() {
-  const b = {}; N.forEach(n => b[n] = 0);
+const tw = n => "NT$" + Math.round(n).toLocaleString();
+const T = x => Math.round(x.cur == "TWD" ? x.amt : x.amt * rate);          // 單筆換成台幣
+const isTr = x => String(x.d || "").startsWith("[轉帳]");
+const nm = x => String(x.d || "").replace("[轉帳]", "");
+const sum = a => a.reduce((s, v) => s + v.amt, 0);
+
+// 兩兩對帳：每一對人，列出「誰欠誰什麼」互相抵銷後的結果
+function pairs() {
+  const own = {}, pay = {};
+  N.forEach(a => { own[a] = {}; pay[a] = {}; N.forEach(b => { own[a][b] = []; pay[a][b] = []; }); });
   X.forEach(x => {
-    const p = (x.sp || []).filter(n => n in b);
-    if (!p.length || !(x.by in b)) return;
-    b[x.by] += J(x); p.forEach(n => b[n] -= J(x) / p.length);
+    const sp = (x.sp || []).filter(n => N.includes(n));
+    if (!N.includes(x.by)) return;
+    if (isTr(x)) { const to = sp[0]; if (to && to !== x.by) pay[x.by][to].push({ d: nm(x), amt: T(x) }); return; }
+    if (!sp.length) return;
+    const part = Math.round(T(x) / sp.length);
+    sp.forEach(q => { if (q !== x.by) own[q][x.by].push({ d: x.d, amt: part }); });
   });
-  const cr = N.filter(n => b[n] > 1).map(n => [n, b[n]]).sort((a, c) => c[1] - a[1]),
-        de = N.filter(n => b[n] < -1).map(n => [n, -b[n]]).sort((a, c) => c[1] - a[1]), t = [];
-  let i = 0, j = 0;
-  while (i < cr.length && j < de.length) {
-    const m = Math.min(cr[i][1], de[j][1]);
-    t.push([de[j][0], cr[i][0], m]); cr[i][1] -= m; de[j][1] -= m;
-    if (cr[i][1] < 1) i++; if (de[j][1] < 1) j++;
+  const out = [], pays = {}, recv = {};
+  N.forEach(n => { pays[n] = 0; recv[n] = 0; });
+  for (let i = 0; i < N.length; i++) for (let j = i + 1; j < N.length; j++) {
+    const a = N[i], b = N[j];
+    if (![own[a][b], own[b][a], pay[a][b], pay[b][a]].some(l => l.length)) continue;
+    const net = sum(own[a][b]) - sum(own[b][a]) - sum(pay[a][b]) + sum(pay[b][a]);
+    const [f, t] = net >= 0 ? [a, b] : [b, a];
+    const lines = [
+      ...own[f][t].map(v => ["＋", f + " → " + t + "　" + v.d, v.amt]),
+      ...own[t][f].map(v => ["－", t + " → " + f + "　" + v.d, v.amt]),
+      ...pay[f][t].map(v => ["－", f + " → " + t + "　已轉帳：" + v.d, v.amt]),
+      ...pay[t][f].map(v => ["＋", t + " → " + f + "　已轉帳：" + v.d, v.amt])
+    ];
+    out.push({ f, t, lines, net: Math.abs(net) });
+    pays[f] += Math.abs(net); recv[t] += Math.abs(net);
   }
-  return { b, t };
+  return { out, pays, recv };
 }
+const lineTxt = (l, i) => (i == 0 && l[0] == "＋" ? "" : l[0]) + l[1] + "　" + tw(l[2]);
 function text() {
-  const { t } = calc(), tot = X.reduce((s, x) => s + J(x), 0);
-  return "【石垣島・沖繩 分帳結算】\n總支出 " + fy(tot) + "（約 " + ft(tot) + "，匯率 " + rate + "）\n" +
-    (t.length ? t.map(r => r[0] + " → " + r[1] + " " + fy(r[2]) + "（約 " + ft(r[2]) + "）").join("\n") : "目前沒有需要轉帳的款項");
+  const { out } = pairs(), tot = X.filter(x => !isTr(x)).reduce((s, x) => s + T(x), 0);
+  return "【石垣島・沖繩 分帳明細（台幣）】\n總支出 " + tw(tot) + "（匯率 1 日圓=" + rate + " 台幣）\n" +
+    (out.length ? out.map(p => "\n" + p.f + " → " + p.t + "\n" + p.lines.map((l, i) => lineTxt(l, i)).join("\n") + "\n＝ " + (p.net ? p.f + " → " + p.t + "　" + tw(p.net) : "已結清")).join("\n") : "目前沒有需要結算的款項");
 }
 
 // 表單只畫一次，避免別人新增資料時把你正在輸入的內容清掉
@@ -78,19 +98,26 @@ function drawForm() {
     <div class="mu">分攤成員</div>
     ${N.map(n => `<label><input type="checkbox" class="sp" value="${n}" checked> ${n}</label>`).join("")}
     <div style="margin-top:8px"><button class="btn p" id="add">新增記帳</button><button class="btn" id="dep">📥 包車訂金（Anita 付 NT$900）</button></div>
-    <div class="mu" id="msg" style="color:red"></div></div>`;
+    <div class="mu" id="msg" style="color:red"></div></div>
+  <div class="card"><b>記錄已轉帳（誰已付給誰，台幣）</b>
+    <div class="row"><select id="tf">${N.map(n => `<option>${n}</option>`).join("")}</select><span style="flex:0;align-self:center">→</span><select id="tt">${N.map((n, i) => `<option ${i == 0 ? "selected" : ""}>${n}</option>`).join("")}</select></div>
+    <div class="row"><input id="ta" type="number" placeholder="金額 NT$"><input id="tn" placeholder="備註（例：包車訂金）"></div>
+    <button class="btn p" id="tradd">記錄已轉帳</button><button class="btn" id="pdep">✅ 小美、Kelly 已各付 NT$225 給 ANITA（包車訂金）</button></div>`;
 }
 function drawSum() {
-  const { b, t } = calc(), tot = X.reduce((s, x) => s + J(x), 0);
+  const { out, pays, recv } = pairs(), tot = X.filter(x => !isTr(x)).reduce((s, x) => s + T(x), 0);
   $("#sum").innerHTML = `
-  <div class="card"><b>結算總覽（雲端同步）</b>　總支出 ${fy(tot)}（約 ${ft(tot)}）
-    ${N.map(n => `<div>${n}：${b[n] >= 0 ? "應收" : "應付"} ${fy(Math.abs(b[n]))}</div>`).join("")}
-    <hr style="border:0;border-top:1px solid var(--bd)">
-    ${t.length ? t.map(r => `<div>💸 ${r[0]} → ${r[1]}　<b>${fy(r[2])}</b> <span class="mu">約 ${ft(r[2])}</span></div>`).join("") : '<div class="mu">目前不需要轉帳</div>'}
-    <div style="margin-top:8px"><a class="btn p" target="_blank" href="https://line.me/R/share?text=${encodeURIComponent(text())}">分享結算到 LINE 群組</a><button class="btn" id="cp">複製結算文字</button></div></div>
-  <h2>全部花費（${X.length} 筆）</h2>
-  ${X.slice().sort((a, c) => c.ts - a.ts).map(x => `
-    <div class="card">${e(x.d)} <b>${x.cur == "TWD" ? "NT$" : "¥"}${Number(x.amt).toLocaleString()}</b>
+  <div class="card"><b>分帳明細（全部換算成台幣）</b>　總支出 ${tw(tot)}
+    <div class="mu">匯率 1 日圓 = ${rate} 台幣；每筆均分後四捨五入，所以明細加總可能與實際相差幾元。</div></div>
+  ${out.length ? out.map(p => `<div class="card"><b>${p.f} → ${p.t}</b>
+    ${p.lines.map((l, i) => `<div>${i == 0 && l[0] == "＋" ? "" : '<span class="mu">' + l[0] + '</span> '}${e(l[1])}　<b>${tw(l[2])}</b></div>`).join("")}
+    <hr style="border:0;border-top:1px solid var(--bd)"><div>＝ ${p.net ? `${p.f} → ${p.t}　<b>${tw(p.net)}</b>` : "<b>已結清 ✓</b>"}</div></div>`).join("") : '<div class="card mu">目前沒有需要結算的款項</div>'}
+  <div class="card"><b>每人合計</b>${N.map(n => `<div>${n}：要付出 ${tw(pays[n])}，可收到 ${tw(recv[n])}</div>`).join("")}
+    <div style="margin-top:8px"><a class="btn p" target="_blank" href="https://line.me/R/share?text=${encodeURIComponent(text())}">分享明細到 LINE 群組</a><button class="btn" id="cp">複製明細文字</button></div></div>
+  <h2>全部紀錄（${X.length} 筆）</h2>
+  ${X.slice().sort((a, c) => c.ts - a.ts).map(x => isTr(x) ?
+    `<div class="card">💸 ${e(x.by)} → ${e((x.sp || [])[0])} 已轉帳 <b>${tw(T(x))}</b> <span class="mu">${e(nm(x))}</span> <a href="#" data-del="${e(x.id)}" style="color:red;margin-left:8px">刪除</a></div>` :
+    `<div class="card">${e(x.d)} <b>${x.cur == "TWD" ? "NT$" : "¥"}${Number(x.amt).toLocaleString()}</b>${x.cur == "TWD" ? "" : ` <span class="mu">≈ ${tw(T(x))}</span>`}
       <div class="mu">${e(x.by)} 付・${(x.sp || []).map(e).join("、")} 分攤 <a href="#" data-del="${e(x.id)}" style="color:red;margin-left:8px">刪除</a></div></div>`).join("")}`;
 }
 
@@ -116,7 +143,7 @@ async function initLiff() {
       if (m) { me = m; localStorage.me = m; const by = $("#by"); if (by) by.value = m; }
       st.textContent = "🟢 " + p.displayName + " 已連線（付款人預設：" + me + "）";
     } else {
-      st.textContent = "🟡 一般瀏覽器模式（未登入 LINE，仍可記帳；建議從 LINE 群組的連結開啟）";
+      st.innerHTML = "🟡 未登入 LINE（仍可記帳，只是不會自動帶入付款人）<br><button class=\"btn p\" id=\"lg\">用 LINE 登入</button>";
     }
   } catch (x) {
     st.textContent = "🟡 LINE 初始化失敗，改用一般模式：" + (x.message || x);
@@ -134,6 +161,15 @@ document.addEventListener("click", async ev => {
       $("#d").value = ""; $("#a").value = ""; $("#msg").textContent = "";
     } else { $("#msg").textContent = "請填金額並至少勾選一位分攤成員"; }
   }
+  if (t.id == "tradd") {
+    const a = +$("#ta").value, f = $("#tf").value, to = $("#tt").value;
+    if (a > 0 && f !== to) { await set(push(ref(db, `rooms/${ROOM}/records`)), { d: "[轉帳]" + ($("#tn").value || "已轉帳"), amt: a, cur: "TWD", by: f, sp: [to], ts: Date.now() }); $("#ta").value = ""; $("#tn").value = ""; }
+    else { $("#msg").textContent = "請填金額，且付款人與收款人不能相同"; }
+  }
+  if (t.id == "pdep") {
+    await set(ref(db, `rooms/${ROOM}/records/paid-dep-mei`), { d: "[轉帳]包車訂金", amt: 225, cur: "TWD", by: "小美", sp: ["ANITA"], ts: Date.now() });
+    await set(ref(db, `rooms/${ROOM}/records/paid-dep-kelly`), { d: "[轉帳]包車訂金", amt: 225, cur: "TWD", by: "Kelly", sp: ["ANITA"], ts: Date.now() });
+  }
   if (t.id == "dep") {
     await set(ref(db, `rooms/${ROOM}/records/charter-dep`), { d: "包車訂金（Anita 已付）", amt: 900, cur: "TWD", by: "ANITA", sp: N.slice(), ts: Date.now() });
   }
@@ -141,9 +177,10 @@ document.addEventListener("click", async ev => {
     ev.preventDefault();
     if (confirm("確定要刪除這筆花費嗎？")) await set(ref(db, `rooms/${ROOM}/records/${t.dataset.del}`), null);
   }
+  if (t.id == "lg") { try { liff.login({ redirectUri: location.href }); } catch (x) { $("#st").textContent = "登入失敗：" + (x.message || x); } }
   if (t.id == "cp") {
     const ok = await copy(text());
-    t.textContent = ok ? "已複製 ✓" : "複製失敗"; setTimeout(() => t.textContent = "複製結算文字", 2000);
+    t.textContent = ok ? "已複製 ✓" : "複製失敗"; setTimeout(() => t.textContent = "複製明細文字", 2000);
   }
 });
 document.addEventListener("change", async ev => {
