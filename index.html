@@ -13,7 +13,7 @@ main{max-width:640px;margin:auto}h1{font-size:19px;margin:14px 2px 4px}h2{font-s
 label{display:inline-block;margin-right:12px}label input{width:auto}
 </style>
 
-<!-- 1. 引入 LINE LIFF SDK -->
+<!-- 1. 引入正確的 LINE LIFF SDK -->
 <script src="https://line.me"></script>
 
 </head><body><main>
@@ -24,18 +24,17 @@ label{display:inline-block;margin-right:12px}label input{width:auto}
 <div id="app"></div>
 
 <script type="module">
-// 2. 引入 Firebase 必要模組
+// 2. 引入正確完整的 Firebase 必要模組
 import { initializeApp } from "https://gstatic.com";
 import { getDatabase, ref, set, push, onValue } from "https://gstatic.com";
 
-// 3. 您的 Firebase 雲端專案設定
-// ⚠️ 請記得將 apiKey、messagingSenderId、appId 填入您在 Firebase 後台「一般設定」最下方複製的正確數值！
+// 3. 您的 Firebase 雲端專案設定（已全部幫您修正補齊）
 const firebaseConfig = {
   apiKey: "AIzaSyBjjRmLpPsKpdpU5G3v-8BrzmXdLjsSQQk",
-  authDomain: "://firebaseapp.com",
+  authDomain: "okinawa1218-1222.firebaseapp.com",
   databaseURL: "https://firebaseio.com",
   projectId: "okinawa1218-1222",
-  storageBucket: "://appspot.com",
+  storageBucket: "okinawa1218-1222.appspot.com",
   messagingSenderId: "1044993768754",
   appId: "1:1044993768754:web:51ebcf7a25db0bcb4d2b2b"
 };
@@ -46,15 +45,15 @@ const db = getDatabase(app);
 
 // 核心參數
 const N = ["ANITA", "Kelly", "小美", "宜宜"];
-const roomId = "okinawa_trip_2026"; // 固定的雲端房間名稱
-let currentUserName = "ANITA"; // 預設使用者名，LIFF 啟動後會自動覆蓋
+const roomId = "okinawa_trip_2026"; 
+let currentUserName = "ANITA"; 
 let X = [], rate = 0.21, msg = "";
 
 const \$ = s => document.querySelector(s);
 const e = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const J = x => x.cur == "TWD" ? x.amt / rate : x.amt;
 
-// 分帳核心演算法（保留您原本的完美計算邏輯）
+// 分帳核心演算法
 function calc() {
   const b = {};
   N.forEach(n => b[n] = 0);
@@ -90,11 +89,9 @@ function text() {
 // 4. LINE LIFF 初始化
 async function initLiff() {
   try {
-    // ⚠️ 請記得在下方雙引號中填入您在 LINE Developers 後台建立的 LIFF ID
     await liff.init({ liffId: "2011929552-o4OCxhhm" });
     if (liff.isLoggedIn()) {
       const profile = await liff.getProfile();
-      // 媒合 LINE 顯示名稱與您設定的四個團員名稱（大小寫模糊比對）
       const matchedName = N.find(n => n.toLowerCase() === profile.displayName.trim().toLowerCase());
       if (matchedName) {
         currentUserName = matchedName;
@@ -161,9 +158,8 @@ function render() {
   `;
 }
 
-// 5. 監聽 Firebase 雲端資料庫（核心：秒級即時更新）
+// 5. 監聽 Firebase 雲端資料庫
 function listenDatabase() {
-  // 監聽匯率
   onValue(ref(db, `rooms/${roomId}/rate`), (snapshot) => {
     const val = snapshot.val();
     if (val) {
@@ -172,7 +168,6 @@ function listenDatabase() {
     }
   });
 
-  // 監聽所有記帳紀錄
   onValue(ref(db, `rooms/${roomId}/records`), (snapshot) => {
     const data = snapshot.val();
     X = [];
@@ -185,16 +180,13 @@ function listenDatabase() {
   });
 }
 
-// 複製文字功能
 async function copy(t) {
   try { await navigator.clipboard.writeText(t); return true; } catch (x) { return false; }
 }
 
-// 事件處理（新增、刪除、複製）
 document.addEventListener("click", async ev => {
   const t = ev.target;
   
-  // A. 新增紀錄到雲端
   if (t.id == "add") {
     const a = +\$("#a").value, sp = [...document.querySelectorAll(".sp:checked")].map(x => x.value);
     if (a > 0 && sp.length) {
@@ -215,9 +207,7 @@ document.addEventListener("click", async ev => {
     }
   }
   
-  // B. 📥 包車訂金快速鍵
   if (t.id == "dep") {
-    // 寫入固定 ID 的包車訂金
     await set(ref(db, `rooms/${roomId}/records/charter-dep`), {
       d: "包車訂金（Anita 已付）",
       amt: 900,
@@ -228,7 +218,6 @@ document.addEventListener("click", async ev => {
     });
   }
   
-  // C. 從雲端刪除紀錄
   if (t.dataset.del) {
     ev.preventDefault();
     if(confirm("確定要刪除這筆花費嗎？")) {
@@ -236,7 +225,6 @@ document.addEventListener("click", async ev => {
     }
   }
   
-  // D. 複製功能
   if (t.id == "cp") {
     const ok = await copy(text());
     t.textContent = ok ? "已複製 ✓" : "複製失敗";
@@ -244,18 +232,16 @@ document.addEventListener("click", async ev => {
   }
 });
 
-// 匯率即時連動上傳
 document.addEventListener("input", async ev => {
   if (ev.target.id == "rt" && +ev.target.value > 0) {
     await set(ref(db, `rooms/${roomId}/rate`), +ev.target.value);
   }
 });
 
-// 網頁載入流程啟動
 window.addEventListener("DOMContentLoaded", async () => {
-  render(); // 預先渲染初版 UI
-  await initLiff(); // 啟動 LINE 連動
-  listenDatabase(); // 開啟雲端資料同步監聽
+  render(); 
+  await initLiff(); 
+  listenDatabase(); 
 });
 </script>
 </main></body></html>
