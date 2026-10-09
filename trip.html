@@ -24,7 +24,7 @@ input,textarea,select{width:100%;padding:8px;border:1px solid var(--bd);border-r
 .flag{background:var(--hl);border-radius:8px;padding:8px;font-size:13px;margin:8px 0}
 h2{font-size:16px;margin:14px 2px 4px}
 </style></head><body>
-<header><h1>🌺 石垣島・沖繩 12/18–12/22</h1><small id="who">登入中…</small></header>
+<header><h1>🌺 石垣島・沖繩 12/18–12/22</h1><small id="who">登入中…</small> <span id="adm" class="mu"></span></header>
 <main id="m"></main>
 <nav id="nav"></nav>
 <script>
@@ -67,6 +67,7 @@ const D=[
 {k:"12/22",w:"二",i:[
 {t:"08:15",n:"樂桃 MM921 沖繩→桃園T1（ANITA、小美）",tr:"飯店→機場 單軌/計程車約20分；國際線建議06:15前到機場，首班車請先確認",a:"那霸機場",x:"08:55抵達；個人行李20kg"},
 {t:"16:50",n:"樂桃 MM929 沖繩→桃園（宜宜、Kelly）",tr:"飯店→機場 約20分",a:"那霸機場",x:"17:35抵達；建議14:50前到機場；加購行李+1；上午可自由活動"}]}];
+const DEF=JSON.parse(JSON.stringify(D.map(d=>d.i)));let edt=null;
 const FL=[["12/18","虎航 IT736","桃園T1 06:35 → 石垣 08:35","15kg","全員"],["12/20","全日空 NH1770","石垣 14:30 → 沖繩 15:30","23kg","全員"],["12/22","樂桃 MM921","沖繩 08:15 → 桃園T1 08:55","20kg","ANITA、小美"],["12/22","樂桃 MM929","沖繩 16:50 → 桃園 17:35","加購行李 +1","宜宜、Kelly"]];
 const HT=[["12/18","東橫INN 沖繩石垣島"],["12/19","石垣海濱飯店"],["12/20–22","OMO5 沖繩那霸 by 星野集團"]];
 const JP=[["你好","こんにちは","Konnichiwa"],["謝謝","ありがとうございます","Arigatou gozaimasu"],["不好意思／請問","すみません","Sumimasen"],["多少錢？","いくらですか？","Ikura desu ka?"],["可以刷卡嗎？","カードは使えますか？","Kaado wa tsukaemasu ka?"],["請給我這個","これをください","Kore o kudasai"],["有中文菜單嗎？","中国語のメニューはありますか？","Chuugokugo no menyuu wa arimasu ka?"],["我有訂位","予約しています","Yoyaku shiteimasu"],["○位","○名です","○ mei desu"],["請結帳","お会計をお願いします","Okaikei o onegaishimasu"],["廁所在哪裡？","トイレはどこですか？","Toire wa doko desu ka?"],["車站／碼頭在哪裡？","駅／港はどこですか？","Eki / Minato wa doko desu ka?"],["請問怎麼去這裡？","ここへの行き方を教えてください","Koko e no ikikata o oshiete kudasai"],["可以幫我拍照嗎？","写真を撮っていただけますか？","Shashin o totte itadakemasu ka?"],["我會過敏／不吃…","アレルギーがあります","Arerugii ga arimasu"],["可以退稅嗎？","免税できますか？","Menzei dekimasu ka?"],["請幫我叫計程車","タクシーを呼んでください","Takushii o yonde kudasai"],["我迷路了","道に迷いました","Michi ni mayoimashita"],["請幫幫我","助けてください","Tasukete kudasai"],["好吃！","おいしいです！","Oishii desu!"],["這個有別的尺寸／顏色嗎？","これの他のサイズ／色はありますか？","Kore no hoka no saizu / iro wa arimasu ka?","購物"],["可以試穿嗎？","試着してもいいですか？","Shichaku shite mo ii desu ka?","購物"],["有庫存嗎？","在庫はありますか？","Zaiko wa arimasu ka?","購物"],["可以用這張優惠券嗎？","このクーポンは使えますか？","Kono kuupon wa tsukaemasu ka?","購物"],["免稅櫃檯在哪裡？","免税カウンターはどこですか？","Menzei kauntaa wa doko desu ka?","購物"],["我要免稅，這是護照","免税でお願いします。パスポートです","Menzei de onegaishimasu. Pasupooto desu","購物"],["請分開包裝","別々に包んでください","Betsubetsu ni tsutsunde kudasai","購物"],["不用袋子／需要袋子","袋は要りません／要ります","Fukuro wa irimasen / irimasu","購物"],["請給我收據","レシートをください","Reshiito o kudasai","購物"],["可以試吃嗎？","試食できますか？","Shishoku dekimasu ka?","購物"],["請載我到這裡（給司機看地圖）","ここまでお願いします","Koko made onegaishimasu","交通"],["大概要多久？","どのくらいかかりますか？","Dono kurai kakarimasu ka?","交通"],["請在這裡停車","ここで止めてください","Koko de tomete kudasai","交通"],["可以刷卡付車資嗎？","カードで払えますか？","Kaado de haraemasu ka?","交通"],["可以請您稍等一下嗎？","少し待っていただけますか？","Sukoshi matte itadakemasu ka?","交通"],["集合是幾點？","集合は何時ですか？","Shuugou wa nanji desu ka?","交通"],["行李可以放後車廂嗎？","荷物をトランクに入れてもいいですか？","Nimotsu o toranku ni irete mo ii desu ka?","交通"],["○○在哪裡？","○○はどこですか？","○○ wa doko desu ka?","問路"],["離這裡遠嗎？","ここから遠いですか？","Koko kara tooi desu ka?","問路"],["走路要幾分鐘？","歩いて何分ですか？","Aruite nanpun desu ka?","問路"],["直走／右轉／左轉","まっすぐ／右／左","Massugu / migi / hidari","問路"],["可以在地圖上指給我看嗎？","地図で教えてください","Chizu de oshiete kudasai","問路"],["最近的車站／便利商店在哪？","一番近い駅／コンビニはどこですか？","Ichiban chikai eki / konbini wa doko desu ka?","問路"],["這班公車有到○○嗎？","このバスは○○に行きますか？","Kono basu wa ○○ ni ikimasu ka?","公共運輸"],["要在哪裡搭車？","どこで乗りますか？","Doko de norimasu ka?","公共運輸"],["下一班是幾點？","次のバスは何時ですか？","Tsugi no basu wa nanji desu ka?","公共運輸"],["車票在哪裡買？","切符はどこで買えますか？","Kippu wa doko de kaemasu ka?","公共運輸"],["到○○要在哪裡下車？","○○はどこで降りますか？","○○ wa doko de orimasu ka?","公共運輸"],["末班車是幾點？","最終は何時ですか？","Saishuu wa nanji desu ka?","公共運輸"],["有一日券嗎？","一日乗車券はありますか？","Ichinichi joshaken wa arimasu ka?","公共運輸"],["船票／渡輪售票處在哪？","乗船券売り場はどこですか？","Joosenken uriba wa doko desu ka?","公共運輸"]];
@@ -81,24 +82,51 @@ const now=new Date(),tk=String(now.getMonth()+1).padStart(2,"0")+"/"+String(now.
 if(D.findIndex(d=>d.k==tk)>=0)day=D.findIndex(d=>d.k==tk);
 const T=[["trip","📅","行程"],["go","✈️","交通住宿"],["bk","📝","訂位"],["cp","🎫","優惠"],["pay","💴","記帳"],["jp","🗣️","日語"],["me","👤","我的"]];
 $("#nav").innerHTML=T.map(t=>`<button data-t="${t[0]}"><b>${t[1]}</b>${t[2]}</button>`).join("");
-$("#nav").onclick=ev=>{const b=ev.target.closest("button");if(b){tab=b.dataset.t;det=-1;render()}};
+$("#nav").onclick=ev=>{const b=ev.target.closest("button");if(b){tab=b.dataset.t;det=-1;edt=null;led=null;render()}};
 function mapLink(a,o){return `<a class="btn" target="_blank" href="${o?"https://www.google.com/maps/dir/?api=1&origin="+encodeURIComponent(o)+"&destination="+encodeURIComponent(a):mq(a)}">${o?"🧭 路線":"📍 地圖"}</a>`}
+let showLogin=false;const isAdm=()=>true;
+function admUI(){}
+function loginCard(){return `<div class="card"><b>管理者登入</b><input id="lem" type="email" placeholder="Email" autocomplete="username"><input id="lpw" type="password" placeholder="密碼" autocomplete="current-password"><button class="btn p" id="alogin">登入</button><button class="btn" id="alcancel">取消</button></div>`}
+window.addEventListener("authchange",()=>{admUI();if(!edt)render()});
+window.addEventListener("unhandledrejection",()=>toast("無法儲存，請檢查網路或資料庫規則"));
+async function saveDay(){if(window.FB){try{await FB.set(FB.ref(FB.db,`rooms/${FB.ROOM}/itin/d${day}`),JSON.stringify(D[day].i))}catch(x){toast("同步失敗："+(x.code||x.message))}}else toast("目前離線，修改只存在這支手機")}
+function initSync(){if(!window.FB){$("#who").textContent="離線：行程修改不會同步";return}
+FB.onValue(FB.ref(FB.db,`rooms/${FB.ROOM}/itin`),s=>{const v=s.val()||{};D.forEach((d,i)=>{try{d.i=v["d"+i]?JSON.parse(v["d"+i]):JSON.parse(JSON.stringify(DEF[i]))}catch(x){}});$("#who").textContent="☁️ 行程全員同步中；個人資料只存在這支手機";if(tab=="trip"&&!edt&&!(document.activeElement&&document.activeElement.matches("input,textarea,select")))render()},err=>{$("#who").textContent="行程同步失敗："+(err.code||err.message)})}
+window.addEventListener("fbready",initSync);
+function editForm(){const s=edt.new?{t:"",n:"",a:"",x:"",tr:"",link:"",c:0}:D[day].i[edt.idx];
+return `<button class="btn" id="ecancel">← 取消</button><div class="card"><b>${edt.new?"新增行程":"編輯行程"}（${D[day].k}）</b>
+<input id="et" placeholder="時間（例：10:30、中午、晚餐）" value="${e(s.t)}"><input id="en" placeholder="名稱" value="${e(s.n)}"><input id="ea" placeholder="地址／Google 地圖搜尋字" value="${e(s.a)}"><input id="etr" placeholder="前往此站的車程（例：約20分）" value="${e(s.tr||"")}"><input id="ex" placeholder="備註（集合、停留時間…）" value="${e(s.x||"")}"><input id="el" placeholder="資訊連結（http 開頭，選填）" value="${e(s.link||"")}">
+<label style="display:block;margin:6px 0"><input type="checkbox" id="ec" style="width:auto" ${s.c?"checked":""}> 標記為集合／出發</label>
+<button class="btn p" id="esave">儲存並同步</button>${edt.new?"":'<button class="btn" id="edel" style="color:#c0392b">刪除這個行程</button>'}</div>`}
 function trip(){const d=D[day];let h=`<div class="days">${D.map((x,i)=>`<button class="${i==day?"on":""}" data-d="${i}">${x.k}(${x.w})</button>`).join("")}</div>`;
 h+=`<div class="mu">👆 點一下行程可看詳細內容</div><div class="flag">🌤️ 當地天氣：<a target="_blank" href="https://www.google.com/search?q=${encodeURIComponent((day<2?"石垣島":"那霸")+" 今日天氣")}">查看${day<2?"石垣島":"那霸"}今日天氣與氣溫</a>（App 無法直接連網取得即時資料）</div>`;
 d.i.forEach((s,i)=>{const nx=d.i[i+1],pv=d.i[i-1];h+=`<div class="card tap ${s.c?"next":""}" data-i="${i}"><span class="t">${e(s.t)}</span> <b>${e(s.n)}</b>${s.c?" 〔集合/出發〕":""}
 ${s.x?`<div class="mu">${e(s.x)}</div>`:""}${s.tr?`<div class="mu">🚗 前往此站：${e(s.tr)}（預估，實際請按「路線」）</div>`:""}<div class="mu">📮 ${e(s.a)}　☎️ 電話請見 Google 地圖</div>
 <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">${mapLink(s.a)}${pv?mapLink(s.a,pv.a):""}${s.link?`<a class="btn" target="_blank" href="${e(s.link)}">ℹ️ 資訊</a>`:""}</div>
-${nx?`<div class="mu" style="margin-top:6px">➡️ 下一站：${e(nx.t)} ${e(nx.n)}</div>`:`<div class="mu" style="margin-top:6px">🏁 今日最後一站</div>`}</div>`});return h}
-function go(){return `<h2>航班（共用）</h2>`+FL.map(f=>`<div class="card"><span class="t">${f[0]}</span> <b>${f[1]}</b><div class="mu">${f[2]}・行李 ${f[3]}</div><div class="mu">👥 ${f[4]}</div></div>`).join("")+`<h2>住宿</h2>`+HT.map(f=>`<div class="card"><span class="t">${f[0]}</span> <b>${f[1]}</b><div class="mu"><a target="_blank" href="${mq(f[1])}">📍 地圖</a></div></div>`).join("")+`<h2>入境流程（參考）</h2><div class="card"><div class="mu">本團 12/18 從桃園直飛石垣島，入境審查與海關在石垣機場辦理，流程與那霸相同。12/20 石垣→沖繩為國內線，抵達那霸不需入境。</div>
-<ol style="padding-left:20px;margin:8px 0"><li>跟著「入境 Arrivals」指示牌走</li><li>在機器掃描護照</li><li>入境審查：護照＋VJW QR Code＋指紋，或填紙本入境卡</li><li>先通過入境審查，再到行李區上廁所、等託運行李</li><li>海關申報：護照＋VJW QR Code，或紙本海關申報單</li></ol><div class="mu">VJW（Visit Japan Web）建議出發前先填好並截圖 QR Code。</div></div><h2>地面交通</h2><div class="card">12/19 石垣港離島碼頭步行約12分（東橫INN）<br>12/21 三八旅客包車（8小時）：古宇利島→美國村→波上宮→PARCO CITY</div><div class="mu">個人機票與訂位代號請放在「我的」頁，只有自己看得到。</div>`}
+${nx?`<div class="mu" style="margin-top:6px">➡️ 下一站：${e(nx.t)} ${e(nx.n)}</div>`:`<div class="mu" style="margin-top:6px">🏁 今日最後一站</div>`}</div>`});h+=isAdm()?`<div style="margin:12px 0"><button class="btn p" id="eadd">➕ 新增行程</button><button class="btn" id="ereset">↺ 還原本日預設</button></div><div class="mu">修改後全員同步更新。</div>`:`<div class="mu" style="margin:12px 0">行程由管理者更新，全員即時同步。</div>`;return h}
+const IMM=`<h2>入境流程（參考）</h2><div class="card"><div class="mu">本團 12/18 從桃園直飛石垣島，入境審查與海關在石垣機場辦理，流程與那霸相同。12/20 石垣→沖繩為國內線，抵達那霸不需入境。</div>
+<ol style="padding-left:20px;margin:8px 0"><li>跟著「入境 Arrivals」指示牌走</li><li>在機器掃描護照</li><li>入境審查：護照＋VJW QR Code＋指紋，或填紙本入境卡</li><li>先通過入境審查，再到行李區上廁所、等託運行李</li><li>海關申報：護照＋VJW QR Code，或紙本海關申報單</li></ol><div class="mu">VJW（Visit Japan Web）建議出發前先填好並截圖 QR Code。</div></div>`;
+function go(){const R=(k,f)=>lst(k).map((r,i)=>f(r,i)).join("");
+return `<h2>航班（共用）</h2>`+R("fl",(f,i)=>`<div class="card">${eb("fl",i)}<span class="t">${e(f[0])}</span> <b>${e(f[1])}</b><div class="mu">${e(f[2])}・行李 ${e(f[3])}</div><div class="mu">👥 ${e(f[4])}</div></div>`)+addb("fl")+`<h2>住宿</h2>`+R("ht",(f,i)=>`<div class="card">${eb("ht",i)}<span class="t">${e(f[0])}</span> <b>${e(f[1])}</b><div class="mu"><a target="_blank" href="${mq(f[1]||"")}">📍 地圖</a></div></div>`)+addb("ht")+IMM+`<h2>地面交通</h2>`+R("gt",(g,i)=>`<div class="card">${eb("gt",i)}${e(g[0])}</div>`)+addb("gt")+`<div style="margin:10px 0"><span class="mu">還原預設：</span><button class="btn" data-lr="fl">航班</button><button class="btn" data-lr="ht">住宿</button><button class="btn" data-lr="gt">地面交通</button></div><div class="mu">所有人都可以新增或編輯，修改後全員同步。個人機票與訂位代號請放在「我的」頁。</div>`}
 const CP=[["BicCamera／KOJIMA","免稅10%＋藥品化妝品再享5% OFF；相機、手錶、家電、玩具7% OFF；日本清酒3% OFF（獺祭、八海山除外）。須同時掃描券上兩條條碼；部分商品不適用（如Apple、Grand Seiko等）。","⚠️ 券面有效期限至 2026/10/31，早於本團旅程，出發前請確認有沒有新版"],["EDION 愛電王","免稅最大10%；家電、手錶、相機、不鏽鋼真空杯7% OFF，或食品、藥品、化妝品5% OFF（擇一）。結帳前出示並掃描兩條條碼，不可與其他優惠併用。","⚠️ 券面有效期限至 2026/10/31，早於本團旅程，出發前請確認有沒有新版"],["札幌藥妝 Sapporo Drug Store","免稅10%＋5% BONUS；不含稅購物滿¥38,888以上，免稅10%＋7% BONUS。結帳前出示護照和優惠券，不能與其他優惠併用，部分商品不適用。","券面未標示期限，請至官網確認適用門市與期限：satudora-taxfree.jp"]];
-function cpn(){return `<div class="mu">優惠券需掃描條碼，請用原圖在店內出示；這裡只整理重點。</div>`+CP.map(c=>`<div class="card"><b>${e(c[0])}</b><div>${e(c[1])}</div><div class="mu" style="margin-top:4px">${e(c[2])}</div></div>`).join("")+(db?`<div class="card"><b>新增優惠</b><input id="cn" placeholder="店家／景點"><input id="cd" placeholder="優惠內容（例：出示此頁9折）"><button class="btn p" id="ca">新增</button></div>`+cps.map(c=>`<div class="card"><b>${e(c.n)}</b><div>${e(c.d)}</div><button class="btn" data-dc="${c.id}">刪除</button></div>`).join(""):"")}
+const GT=[["12/19 石垣港離島碼頭步行約12分（東橫INN）"],["12/21 三八旅客包車（8小時）：古宇利島→美國村→波上宮→PARCO CITY"]];
+const BKL=BK.map(b=>[b[2],b[1],b[3],b[4],"未確認",""]);
+const LD={fl:{def:FL,h:["日期（例：12/18）","航班","路線／時間","行李","搭乘者"]},ht:{def:HT,h:["日期","住宿名稱"]},gt:{def:GT,h:["地面交通說明"]},cp:{def:CP,h:["店家／名稱","優惠內容","備註（期限等）"]},bk:{def:BKL,h:["日期時間","類型（餐廳／門票／包車）","名稱","備註","狀態","訂位代號／人數／備註"]}};
+let LV={},led=null;
+const lst=k=>LV[k]||LD[k].def;
+async function saveList(k){if(window.FB){try{await FB.set(FB.ref(FB.db,`rooms/${FB.ROOM}/lists/${k}`),JSON.stringify(lst(k)))}catch(x){toast("同步失敗："+(x.code||x.message))}}else toast("目前離線，修改只存在這支手機")}
+const eb=(k,i)=>`<button class="btn" data-le="${k}:${i}" style="padding:3px 10px;float:right">✏️</button>`;
+const addb=k=>`<button class="btn p" data-la="${k}">➕ 新增</button>`;
+function listForm(){const L=LD[led.k],row=led.new?L.h.map((h,i)=>led.k=="bk"&&i==4?"未確認":""):lst(led.k)[led.idx];
+return `<button class="btn" id="lcancel">← 取消</button><div class="card"><b>${led.new?"新增":"編輯"}</b>${L.h.map((h,i)=>led.k=="bk"&&i==4?`<div class="mu">${h}</div><select id="lf${i}">${ST.map(s=>`<option ${s==(row[i]||"未確認")?"selected":""}>${s}</option>`).join("")}</select>`:`<input id="lf${i}" placeholder="${e(h)}" value="${e(row[i]||"")}">`).join("")}
+<button class="btn p" id="lsave">儲存並同步</button>${led.new?"":'<button class="btn" id="ldel" style="color:#c0392b">刪除</button>'}</div>`}
+function initLists(){if(!window.FB)return;FB.onValue(FB.ref(FB.db,`rooms/${FB.ROOM}/lists`),s=>{const v=s.val()||{};LV={};Object.keys(LD).forEach(k=>{if(v[k]){try{LV[k]=JSON.parse(v[k])}catch(x){}}});if(!edt&&!led&&!(document.activeElement&&document.activeElement.matches("input,textarea,select")))render()})}
+window.addEventListener("fbready",initLists);
+function cpn(){return `<div class="mu">優惠券需掃描條碼，請用原圖在店內出示；這裡只整理重點。所有人都可以新增或編輯。</div>`+lst("cp").map((c,i)=>`<div class="card">${eb("cp",i)}<b>${e(c[0])}</b><div>${e(c[1])}</div><div class="mu" style="margin-top:4px">${e(c[2])}</div></div>`).join("")+addb("cp")+` <button class="btn" data-lr="cp">↺ 還原預設</button>`}
 const J=x=>x.cur=="TWD"?x.amt/rate:x.amt;
 function bal(){const b={};Object.keys(members).forEach(k=>b[k]=0);exps.forEach(x=>{const p=(x.sp||[]).filter(k=>k in members);if(!p.length)return;b[x.by]=(b[x.by]||0)+J(x);p.forEach(k=>b[k]=(b[k]||0)-J(x)/p.length)});return b}
 function pay(){return `<div class="card"><b>記帳分帳</b><div class="mu">記帳分帳是獨立頁面，請從 LINE 開啟，全員即時同步。</div><a class="btn p" href="https://liff.line.me/2011929552-o4OCxhhm" style="margin-top:8px">開啟記帳分帳（LINE）→</a></div>`}
-function bk(){const L=BK.map(b=>({key:b[0],ty:b[1],dt:b[2],n:b[3],nt:b[4],...(bks[b[0]]||{})})).concat(Object.entries(bks).filter(([k,v])=>v.custom).map(([k,v])=>({key:k,...v})));
-return `<div class="card"><b>新增訂位／門票</b><input id="bn" placeholder="名稱（餐廳／門票）"><input id="bd" placeholder="日期時間（例：12/20 18:00）"><button class="btn p" id="ba">新增</button></div>`+L.map(b=>`<div class="card"><span class="t">${e(b.dt)}</span> <b>${e(b.n)}</b> <span class="mu">${e(b.ty||"")}</span>${b.nt?`<div class="mu">${e(b.nt)}</div>`:""}
-<div class="row"><select data-bk="${b.key}" data-f="st">${ST.map(s=>`<option ${s==(b.st||"未確認")?"selected":""}>${s}</option>`).join("")}</select><input data-bk="${b.key}" data-f="code" value="${e(b.code||"")}" placeholder="訂位代號／人數／備註"></div></div>`).join("")}
+function bk(){return `<div class="mu">所有人都可以更新狀態或新增，修改後全員同步。</div>`+lst("bk").map((b,i)=>`<div class="card">${eb("bk",i)}<span class="t">${e(b[0])}</span> <b>${e(b[2])}</b> <span class="mu">${e(b[1])}</span>${b[3]?`<div class="mu">${e(b[3])}</div>`:""}<div class="row"><select data-bi="${i}" data-bf="4">${ST.map(s=>`<option ${s==(b[4]||"未確認")?"selected":""}>${s}</option>`).join("")}</select><input data-bi="${i}" data-bf="5" value="${e(b[5]||"")}" placeholder="訂位代號／人數／備註"></div></div>`).join("")+addb("bk")+` <button class="btn" data-lr="bk">↺ 還原預設</button>`}
 let jc="全部",det=-1;
 const JC=["全部","日常","購物","交通","問路","公共運輸"];
 function toast(m){let x=document.getElementById("ts");if(!x){x=document.createElement("div");x.id="ts";x.style.cssText="position:fixed;left:12px;right:12px;bottom:80px;background:#222;color:#fff;padding:10px;border-radius:10px;z-index:9;font-size:14px";document.body.appendChild(x)}x.textContent=m;x.style.display="block";clearTimeout(x._t);x._t=setTimeout(()=>x.style.display="none",3500)}
@@ -114,17 +142,35 @@ return `<button class="btn" id="dback">← 返回 ${d.k} 行程</button><div cla
 ${s.x?`<div>📝 ${e(s.x)}</div>`:""}${s.tr?`<div>🚗 前往此站：${e(s.tr)}<span class="mu">（預估）</span></div>`:""}<div>📮 ${e(s.a)}</div><div>☎️ 電話與營業時間：按「地圖」進 Google 地圖，可一鍵撥打</div>
 <div style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap">${mapLink(s.a)}${pv?mapLink(s.a,pv.a):""}${s.link?`<a class="btn" target="_blank" href="${e(s.link)}">ℹ️ 資訊</a>`:""}</div>
 <div class="mu">${pv?`⬅️ 上一站：${e(pv.t)} ${e(pv.n)}`:"🏁 今日第一站"}</div><div class="mu">${nx?`➡️ 下一站：${e(nx.t)} ${e(nx.n)}`:"🏁 今日最後一站"}</div>
-<div style="margin-top:8px;display:flex;gap:6px">${pv?`<button class="btn" data-nav="-1">← 上一站</button>`:""}${nx?`<button class="btn p" data-nav="1">下一站 →</button>`:""}</div></div>
+<div style="margin-top:8px;display:flex;gap:6px">${pv?`<button class="btn" data-nav="-1">← 上一站</button>`:""}${nx?`<button class="btn p" data-nav="1">下一站 →</button>`:""}</div>${isAdm()?`<div style="margin-top:8px"><button class="btn" id="eedit">✏️ 編輯</button><button class="btn" data-mv="-1">↑ 上移</button><button class="btn" data-mv="1">↓ 下移</button></div>`:""}</div>
 <div class="card"><b>小提醒</b><div>${tip}</div></div><h2>相關日語（${cat}）</h2>${ps.map(jcard).join("")}<button class="btn" data-jc="${cat}" data-go="jp">看更多日語 →</button>`}
 function mine(){if(!unl){return localStorage.pin?`<div class="card"><b>🔒 輸入 PIN</b><input id="pi" type="password" inputmode="numeric" maxlength="6" placeholder="PIN"><button class="btn p" id="pu">解鎖</button><div class="mu" id="pm"></div></div>`:`<div class="card"><b>設定 4–6 位數 PIN</b><input id="pn" type="password" inputmode="numeric" maxlength="6" placeholder="PIN"><button class="btn p" id="ps">設定並進入</button><div class="mu" id="pm">PIN 與內容只存在這支手機，忘了無法找回；只能擋一般翻看，請勿放護照號碼等敏感資料。</div></div>`}
 return `<div class="card"><b>我的機票／訂位代號</b><textarea id="tkt" rows="4" placeholder="航班、訂位代號、行李…（只存在這支手機）">${e(me.tickets)}</textarea></div>
 <div class="card"><b>攜帶物品</b>${PACK.map(p=>`<label style="display:block"><input type="checkbox" style="width:auto" data-p="${e(p)}" ${me.pack[p]?"checked":""}> ${e(p)}</label>`).join("")}</div>
 <div class="card"><b>個人筆記</b><textarea id="nt" rows="5">${e(me.notes)}</textarea></div><button class="btn" id="lk">🔒 鎖定</button>`}
-function render(){document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t==tab));
+function render(){admUI();document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t==tab));
 const need=["pay","me","bk"].includes(tab)&&!db;
-$("#m").innerHTML=need?`<div class="card">此功能需要登入 claude.ai 帳號後才能使用（共用與個人資料皆存於雲端）。</div>`:(tab=="trip"&&det>=0?detail():({trip,go,bk,cp:cpn,pay,jp,me:mine}[tab])())}
+$("#m").innerHTML=(showLogin&&!isAdm()?loginCard():"")+(need?`<div class="card">此功能需要登入 claude.ai 帳號後才能使用（共用與個人資料皆存於雲端）。</div>`:(led?listForm():tab=="trip"&&edt?editForm():tab=="trip"&&det>=0?detail():({trip,go,bk,cp:cpn,pay,jp,me:mine}[tab])()))}
 async function save(){if(db)try{await db.collection("data/users/"+uid).doc("me").set(me)}catch(x){}}
 document.addEventListener("click",async ev=>{const t=ev.target,d=t.dataset;
+if(d.le){const [k,i]=d.le.split(":");led={k,idx:+i};render();scrollTo(0,0)}
+if(d.la){led={k:d.la,new:1};render();scrollTo(0,0)}
+if(t.id=="lcancel"){led=null;render()}
+if(t.id=="lsave"){const L=LD[led.k],row=L.h.map((_,i)=>$("#lf"+i).value.trim());if(!row.some(x=>x)){toast("請至少填一個欄位");return}const a=lst(led.k).map(r=>r.slice()),k=led.k;if(led.new)a.push(row);else a[led.idx]=row;LV[k]=a;led=null;render();await saveList(k)}
+if(t.id=="ldel"){if(confirm("確定刪除？所有人都會看到刪除。")){const a=lst(led.k).map(r=>r.slice()),k=led.k;a.splice(led.idx,1);LV[k]=a;led=null;render();await saveList(k)}}
+if(d.lr){if(confirm("還原為最初版本？所有人都會被還原。")){delete LV[d.lr];render();if(window.FB){try{await FB.remove(FB.ref(FB.db,`rooms/${FB.ROOM}/lists/${d.lr}`))}catch(x){toast("同步失敗："+(x.code||x.message))}}}}
+if(t.id=="alog"){ev.preventDefault();showLogin=true;render();scrollTo(0,0)}
+if(t.id=="alcancel"){showLogin=false;render()}
+if(t.id=="alogin"){try{await FB.login($("#lem").value.trim(),$("#lpw").value);showLogin=false;toast("已登入管理者")}catch(x){toast("登入失敗："+(x.code||x.message))}}
+if(t.id=="alogout"){ev.preventDefault();await FB.logout()}
+if(t.id=="eedit"){edt={idx:det};render();scrollTo(0,0)}
+if(t.id=="eadd"){edt={new:1,idx:det>=0?det+1:D[day].i.length};render();scrollTo(0,0)}
+if(t.id=="ecancel"){edt=null;render()}
+if(t.id=="esave"){const n=$("#en").value.trim();if(!n){toast("請填名稱");return}const it={t:$("#et").value.trim(),n,a:$("#ea").value.trim()||n};const tr=$("#etr").value.trim(),x=$("#ex").value.trim(),l=$("#el").value.trim();if(tr)it.tr=tr;if(x)it.x=x;if(/^https?:\/\//.test(l))it.link=l;if($("#ec").checked)it.c=1;
+const arr=D[day].i;if(edt.new)arr.splice(edt.idx,0,it);else arr[edt.idx]=it;edt=null;det=-1;render();await saveDay()}
+if(t.id=="edel"){if(confirm("確定刪除這個行程？所有人都會看到刪除。")){D[day].i.splice(edt.idx,1);edt=null;det=-1;render();await saveDay()}}
+if(t.id=="ereset"){if(confirm("還原本日行程為最初版本？所有人都會被還原。")){D[day].i=JSON.parse(JSON.stringify(DEF[day]));det=-1;render();if(window.FB){try{await FB.remove(FB.ref(FB.db,`rooms/${FB.ROOM}/itin/d${day}`))}catch(x){toast("同步失敗："+(x.code||x.message))}}}}
+if(d.mv){const j=det+ +d.mv,arr=D[day].i;if(j>=0&&j<arr.length){[arr[det],arr[j]]=[arr[j],arr[det]];det=j;render();await saveDay()}}
 if(t.id=="ps"){const v=$("#pn").value;if(/^\d{4,6}$/.test(v)){localStorage.pin=hs(v);unl=true;render()}else $("#pm").textContent="請輸入 4–6 位數字"}
 if(t.id=="pu"){if(hs($("#pi").value)==localStorage.pin){unl=true;render()}else $("#pm").textContent="PIN 不正確"}
 if(t.id=="lk"){unl=false;render()}
@@ -153,7 +199,9 @@ if(t.dataset.p){me.pack[t.dataset.p]=t.checked;save()}});
 const LDB=(()=>{const K="tripdb",ld=()=>{try{return JSON.parse(localStorage.getItem(K))||{}}catch(x){return{}}},sv=o=>{try{localStorage.setItem(K,JSON.stringify(o))}catch(x){}},L={};
 const snap=c=>({docs:Object.entries(ld()[c]||{}).map(([id,v])=>({id,data:()=>v}))});
 const fire=(c,id)=>{(L[c]||[]).forEach(f=>f(snap(c)));(L[c+"/"+id]||[]).forEach(g=>g())};
-return{collection:c=>({doc:id=>({set:async v=>{const o=ld();(o[c]=o[c]||{})[id]=v;sv(o);fire(c,id)},delete:async()=>{const o=ld();if(o[c])delete o[c][id];sv(o);fire(c,id)},onSnapshot:f=>{const g=()=>{const v=(ld()[c]||{})[id];f({exists:!!v,data:()=>v})};(L[c+"/"+id]=L[c+"/"+id]||[]).push(g);g()}}),onSnapshot:f=>{(L[c]=L[c]||[]).push(f);f(snap(c))}})}})();
+const SH=["bookings","coupons"],rp=(c,id)=>FB.ref(FB.db,`rooms/${FB.ROOM}/sh/${c}${id?"/"+id:""}`);
+const rc=c=>({doc:id=>({set:async v=>{if(!window.FB)throw new Error("offline");await FB.set(rp(c,id),v)},delete:async()=>{if(!window.FB)throw new Error("offline");await FB.remove(rp(c,id))}}),onSnapshot:f=>{const go=()=>FB.onValue(rp(c),s=>{const o=s.val()||{};f({docs:Object.entries(o).map(([id,v])=>({id,data:()=>v}))})});window.FB?go():window.addEventListener("fbready",go)}});
+return{collection:c=>SH.includes(c)?rc(c):({doc:id=>({set:async v=>{const o=ld();(o[c]=o[c]||{})[id]=v;sv(o);fire(c,id)},delete:async()=>{const o=ld();if(o[c])delete o[c][id];sv(o);fire(c,id)},onSnapshot:f=>{const g=()=>{const v=(ld()[c]||{})[id];f({exists:!!v,data:()=>v})};(L[c+"/"+id]=L[c+"/"+id]||[]).push(g);g()}}),onSnapshot:f=>{(L[c]=L[c]||[]).push(f);f(snap(c))}})}})();
 const claude={use:async n=>n=="user"?{id:async()=>"local"}:LDB};
 let unl=false;const hs=p=>{let h=0;for(const c of p)h=(h*31+c.charCodeAt(0))>>>0;return String(h)};
 (async()=>{render();try{
@@ -167,4 +215,18 @@ db.collection("settings").doc("rate").onSnapshot(s=>{if(s.exists){rinfo=s.data()
 db.collection("coupons").onSnapshot(s=>{cps=s.docs.map(d=>({id:d.id,...d.data()}));if(tab=="cp"&&document.activeElement.tagName!="INPUT")render()});
 db.collection("data/users/"+uid).doc("me").onSnapshot(s=>{if(s.exists&&!me.loaded){me={tickets:"",notes:"",pack:{},...s.data(),loaded:1};if(tab=="me")render()}});
 }catch(x){$("#who").textContent="離線模式"}})();
+document.addEventListener("change",async ev=>{const t=ev.target;if(t.dataset.bi!==undefined){const a=lst("bk").map(r=>r.slice());a[+t.dataset.bi][+t.dataset.bf]=t.value;LV.bk=a;await saveList("bk")}});
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+try {
+  const db = getDatabase(initializeApp({
+    apiKey: "AIzaSyBjjRmLpPsKpdpU5G3v-8BrzmXdLjsSQQk", authDomain: "okinawa1218-1222.firebaseapp.com",
+    databaseURL: "https://okinawa1218-1222-default-rtdb.firebaseio.com", projectId: "okinawa1218-1222",
+    storageBucket: "okinawa1218-1222.appspot.com", messagingSenderId: "1044993768754", appId: "1:1044993768754:web:51ebcf7a25db0bcb4d2b2b"
+  }));
+  window.FB = { db, ref, set, onValue, remove, ROOM: "okinawa_k7x2q9" };
+} catch (x) { console.error(x); }
+window.dispatchEvent(new Event("fbready"));
 </script></body></html>
